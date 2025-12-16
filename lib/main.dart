@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'movie_section.dart';
-import 'movie_detail_page.dart';
-import 'home_page_content.dart';
+import 'package:flutter/services.dart';
 import 'main_screen.dart';
 
 void main() {
+  // Ensure status bar style matches our dark theme
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+  ));
   runApp(const MyApp());
 }
 
@@ -14,24 +17,46 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Akbarrr',
+      title: 'FilmKu',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Colors.black,
-        colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red),
-        scaffoldBackgroundColor: Colors.black, // Latar belakang body hitam
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFFFF005D), // Signature Red/Pink
+        scaffoldBackgroundColor: const Color(0xFF141414), // Premium Dark Grey
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFFFF005D),
+          secondary: Color(0xFF00E5FF), // Cyan accent for modern feel
+          surface: Color(0xFF1F1F1F),
+          background: Color(0xFF141414),
+        ),
         appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF141414),
           elevation: 0,
-          backgroundColor: Colors.black,
+          centerTitle: false,
           iconTheme: IconThemeData(color: Colors.white),
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Roboto', // Default, can be changed if font assets added
+          ),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF1F1F1F),
+          selectedItemColor: Color(0xFFFF005D),
+          unselectedItemColor: Colors.grey,
         ),
         textTheme: const TextTheme(
-          // Mengatur teks default menjadi putih
           bodyLarge: TextStyle(color: Colors.white),
-          bodyMedium: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white70),
+          titleLarge: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
-      home: MainScreen(),
+      home: const MainScreen(),
     );
   }
 }
