@@ -11,7 +11,7 @@ class HomePageContent extends StatelessWidget {
         MovieSection(
           title: 'Rekomendasi Untukmu',
           movieTitles: [
-            'Kisah Cinta akbar',
+            'Kisah Cinta Cukurukuk',
             'sedihnya ditinggalin',
             'Fast & Furious',
             'Fast & Furious 9',
