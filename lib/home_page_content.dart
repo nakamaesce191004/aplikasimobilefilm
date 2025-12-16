@@ -12,7 +12,7 @@ class HomePageContent extends StatelessWidget {
           title: 'Rekomendasi Untukmu',
           movieTitles: [
             'Kisah Cinta Cukurukuk',
-            'sedihnya ditinggalin',
+            'sedihnya ditinggalin rakagit',
             'Fast & Furious',
             'Fast & Furious 9',
             'Fast & Furious 10',
