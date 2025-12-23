@@ -1,0 +1,255 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/watchlist_provider.dart';
+import 'movie_detail_page.dart';
+import 'anime_detail_page.dart';
+import 'models/movie.dart';
+import 'models/anime.dart'; // Import Anime model
+
+class WatchlistPage extends StatelessWidget {
+  const WatchlistPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          title: const Text('My Watchlist'),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          elevation: 0,
+          bottom: const TabBar(
+            indicatorColor: Color(0xFFFF005D),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.grey,
+            tabs: [
+              Tab(text: 'Movies'),
+              Tab(text: 'Anime'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildMovieWatchlist(context),
+            _buildAnimeWatchlist(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMovieWatchlist(BuildContext context) {
+    return Consumer<WatchlistProvider>(
+      builder: (context, watchlistProvider, child) {
+        final movies = watchlistProvider.watchlist;
+        
+        if (movies.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.movie_creation_outlined, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text('Your movies watchlist is empty', style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+          );
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.7,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: movies.length,
+          itemBuilder: (context, index) {
+            final movie = movies[index];
+            return _buildMovieCard(context, movie);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildAnimeWatchlist(BuildContext context) {
+    return Consumer<WatchlistProvider>(
+      builder: (context, watchlistProvider, child) {
+        final animes = watchlistProvider.animeWatchlist;
+        
+        if (animes.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.tv, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text('Your anime watchlist is empty', style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+          );
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.7,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: animes.length,
+          itemBuilder: (context, index) {
+            final anime = animes[index];
+            return _buildAnimeCard(context, anime);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildMovieCard(BuildContext context, Movie movie) {
+    return Stack(
+      children: [
+         GestureDetector(
+          onTap: () {
+             Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MovieDetailPage(movie: movie),
+              ),
+            );
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    image: DecorationImage(
+                      image: NetworkImage(movie.fullPosterUrl),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+               Text(
+                movie.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ]
+          )
+         ),
+         Positioned(
+           top: 4,
+           right: 4,
+           child: GestureDetector(
+             onTap: () {
+               Provider.of<WatchlistProvider>(context, listen: false).removeFromWatchlist(movie.id);
+               ScaffoldMessenger.of(context).showSnackBar(
+                 SnackBar(content: Text('${movie.title} removed from Watchlist')),
+               );
+             },
+             child: Container(
+               decoration: const BoxDecoration(
+                 color: Colors.black54,
+                 shape: BoxShape.circle
+               ),
+               padding: const EdgeInsets.all(6),
+               child: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
+             )
+           )
+         )
+      ]
+    );
+  }
+
+  Widget _buildAnimeCard(BuildContext context, Anime anime) {
+    return Stack(
+      children: [
+         GestureDetector(
+          onTap: () {
+             Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AnimeDetailPage(anime: anime),
+              ),
+            );
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    image: DecorationImage(
+                      image: NetworkImage(anime.image),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+               Text(
+                anime.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ]
+          )
+         ),
+         Positioned(
+           top: 4,
+           right: 4,
+           child: GestureDetector(
+             onTap: () {
+               Provider.of<WatchlistProvider>(context, listen: false).removeAnimeFromWatchlist(anime.malId);
+               ScaffoldMessenger.of(context).showSnackBar(
+                 SnackBar(content: Text('${anime.title} removed from Watchlist')),
+               );
+             },
+             child: Container(
+               decoration: const BoxDecoration(
+                 color: Colors.black54,
+                 shape: BoxShape.circle
+               ),
+               padding: const EdgeInsets.all(6),
+               child: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
+             )
+           )
+         )
+      ]
+    );
+  }
+}

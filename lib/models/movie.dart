@@ -40,4 +40,15 @@ class Movie {
     if (backdropPath.startsWith('http')) return backdropPath;
     return 'https://image.tmdb.org/t/p/original$backdropPath';
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'overview': overview,
+      'poster_path': posterPath,
+      'backdrop_path': backdropPath,
+      'vote_average': voteAverage,
+      'release_date': releaseDate,
+    };
+  }
 }

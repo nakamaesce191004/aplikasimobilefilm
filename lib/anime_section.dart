@@ -129,24 +129,9 @@ class AnimeSection extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              // Play Icon overlay
-                              Center(
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.4),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white54, width: 1.5),
-                                  ),
-                                  child: const Icon(
-                                    Icons.play_arrow_rounded,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            
+                              ],
+                            ),
                         ),
                       ),
                       const SizedBox(height: 8),

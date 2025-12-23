@@ -35,10 +35,38 @@ class ApiService {
     }
   }
 
+  Future<List<Review>> getMovieReviews(int movieId) async {
+    final response = await http.get(Uri.parse('$baseUrl/movie/$movieId/reviews?api_key=$apiKey'));
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      final List<dynamic> results = data['results'];
+      return results.map((json) => Review.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load reviews');
+    }
+  }
+
   List<Movie> _parseMovies(String responseBody) {
     final Map<String, dynamic> data = json.decode(responseBody);
     final List<dynamic> results = data['results'];
     return results.map((json) => Movie.fromJson(json)).toList();
+  }
+}
+
+class Review {
+  final String author;
+  final String content;
+  final double rating;
+
+  Review({required this.author, required this.content, required this.rating});
+
+  factory Review.fromJson(Map<String, dynamic> json) {
+    final authorDetails = json['author_details'] ?? {};
+    return Review(
+      author: json['author'] ?? 'Anonymous',
+      content: json['content'] ?? 'No review text.',
+      rating: (authorDetails['rating'] ?? 0.0).toDouble(),
+    );
   }
 }
 

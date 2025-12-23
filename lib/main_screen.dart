@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/navigation_provider.dart';
+import 'watchlist_page.dart'; // Add WatchlistPage import
 import 'home_page_content.dart'; // Import konten halaman home
 import 'anime_page_content.dart'; // Import konten halaman anime
 import 'services/api_service.dart';
@@ -16,26 +19,102 @@ const List<String> categories = [
   'Movies',
 ];
 
+
+
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<NavigationProvider>(
+      builder: (context, navigationProvider, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: _buildBody(navigationProvider.currentIndex),
+          bottomNavigationBar: _buildBottomNavigationBar(context, navigationProvider.currentIndex),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(int index) {
+    switch (index) {
+      case 0:
+        return const HomeTabContainer();
+      case 1:
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.play_circle_outline, size: 64, color: Colors.white24),
+              SizedBox(height: 16),
+              Text('Shorts Coming Soon', style: TextStyle(color: Colors.white54, fontSize: 18)),
+            ],
+          ),
+        );
+      case 2:
+        // Use WatchlistPage as the tab body.
+        // Important: WatchlistPage has its own Scaffold/AppBar, 
+        // using it as body is fine but might duplicate AppBars if MainScreen had one.
+        // MainScreen has NO AppBar now (moved to HomeTabContainer), so this is perfect.
+        return const WatchlistPage(); 
+      case 3:
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.grid_view_rounded, size: 64, color: Colors.white24),
+              SizedBox(height: 16),
+              Text('More Menu Coming Soon', style: TextStyle(color: Colors.white54, fontSize: 18)),
+            ],
+          ),
+        );
+      default:
+        return const HomeTabContainer();
+    }
+  }
+
+  Widget _buildBottomNavigationBar(BuildContext context, int currentIndex) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Colors.white12, width: 0.5)),
+      ),
+      child: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color(0xFF141414),
+        selectedItemColor: const Color(0xFFFF005D),
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        currentIndex: currentIndex,
+        onTap: (index) {
+          Provider.of<NavigationProvider>(context, listen: false).setIndex(index);
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Beranda'),
+          BottomNavigationBarItem(icon: Icon(Icons.play_circle_outline), label: 'Shorts'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark_outline), label: 'Watchlist'), // Changed label to Watchlist
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Lainnya'),
+        ],
+      ),
+    );
+  }
+}
+
+class HomeTabContainer extends StatelessWidget {
+  const HomeTabContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: categories.length,
       child: Scaffold(
-        // Background color handled by theme, but explicit here for safety if needed
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
-
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: _buildCustomAppBar(context),
-
-        bottomNavigationBar: _buildBottomNavigationBar(context),
-
         body: const TabBarView(
           physics: BouncingScrollPhysics(),
           children: [
-            HomePageContent(), // Konten Halaman Utama di Tab 'Home'
-            Center(
+            HomePageContent(),
+             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -58,7 +137,6 @@ class MainScreen extends StatelessWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          // Logo text with gradient or bold color
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
               colors: [Color(0xFFFF005D), Color(0xFF00E5FF)],
@@ -68,12 +146,10 @@ class MainScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
-                color: Colors.white, // Required for ShaderMask
+                color: Colors.white,
               ),
             ),
           ),
-
-          // Ikon Pencarian dan Profil
           Row(
             children: <Widget>[
               IconButton(
@@ -111,34 +187,6 @@ class MainScreen extends StatelessWidget {
         labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         unselectedLabelColor: Colors.white60,
         tabs: categories.map((name) => Tab(text: name)).toList(),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.white12, width: 0.5)),
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xFF141414), // Match scaffold for seamless look
-        selectedItemColor: const Color(0xFFFF005D),
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 12),
-        currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Beranda'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.play_circle_outline),
-            label: 'Shorts',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark_outline), label: 'Watchlist'),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Lainnya'),
-        ],
-        onTap: (index) {},
       ),
     );
   }

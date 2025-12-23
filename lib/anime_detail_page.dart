@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_film/webview_player_page.dart';
+import 'package:provider/provider.dart';
+import 'providers/watchlist_provider.dart';
 import 'models/anime.dart';
 import 'services/anime_service.dart';
 import 'dart:io';
@@ -53,6 +55,34 @@ class AnimeDetailPage extends StatelessWidget {
             expandedHeight: 400,
             pinned: true,
             backgroundColor: const Color(0xFF141414),
+            actions: [
+               Consumer<WatchlistProvider>(
+                builder: (context, provider, child) {
+                  final isSaved = provider.isAnimeInWatchlist(anime.malId);
+                  return IconButton(
+                    icon: Icon(
+                      isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      color: isSaved ? const Color(0xFFFF005D) : Colors.white,
+                      size: 28,
+                    ),
+                    onPressed: () {
+                      if (isSaved) {
+                        provider.removeAnimeFromWatchlist(anime.malId);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${anime.title} removed from Watchlist')),
+                        );
+                      } else {
+                        provider.addAnimeToWatchlist(anime);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${anime.title} added to Watchlist')),
+                        );
+                      }
+                    },
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Image.network(
                 anime.image,

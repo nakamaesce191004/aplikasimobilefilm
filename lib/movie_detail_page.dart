@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
 import '../../models/movie.dart';
+import '../../services/api_service.dart'; // Added for fetching reviews
+import 'package:provider/provider.dart';
+import 'providers/watchlist_provider.dart';
 
-class MovieDetailPage extends StatelessWidget {
+class MovieDetailPage extends StatefulWidget {
   final Movie movie;
 
   const MovieDetailPage({super.key, required this.movie});
+
+  @override
+  State<MovieDetailPage> createState() => _MovieDetailPageState();
+}
+
+class _MovieDetailPageState extends State<MovieDetailPage> {
+  late Future<List<Review>> _reviewsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reviewsFuture = ApiService().getMovieReviews(widget.movie.id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +34,38 @@ class MovieDetailPage extends StatelessWidget {
             expandedHeight: 400.0,
             floating: false,
             pinned: true,
+            actions: [
+               Consumer<WatchlistProvider>(
+                builder: (context, provider, child) {
+                  final isSaved = provider.isInWatchlist(widget.movie.id);
+                  return IconButton(
+                    icon: Icon(
+                      isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      color: isSaved ? const Color(0xFFFF005D) : Colors.white,
+                      size: 28,
+                    ),
+                    onPressed: () {
+                      if (isSaved) {
+                        provider.removeFromWatchlist(widget.movie.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${widget.movie.title} removed from Watchlist')),
+                        );
+                      } else {
+                        provider.addToWatchlist(widget.movie);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${widget.movie.title} added to Watchlist')),
+                        );
+                      }
+                    },
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               title: Text(
-                movie.title,
+                widget.movie.title,
                 textScaleFactor: 1.0,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
@@ -35,7 +79,7 @@ class MovieDetailPage extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    movie.fullBackdropUrl,
+                    widget.movie.fullBackdropUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (ctx, _, __) => Container(
                       color: Colors.grey.shade900,
@@ -66,7 +110,7 @@ class MovieDetailPage extends StatelessWidget {
                   // Meta Info Row
                   Row(
                     children: [
-                      _buildTag(movie.releaseDate.split('-').first),
+                      _buildTag(widget.movie.releaseDate.split('-').first),
                       const SizedBox(width: 8),
                       _buildTag('Movie'), // Type hardcoded for now
                       const SizedBox(width: 8),
@@ -81,7 +125,7 @@ class MovieDetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        movie.voteAverage.toStringAsFixed(1),
+                        widget.movie.voteAverage.toStringAsFixed(1),
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontSize: 48,
@@ -119,17 +163,14 @@ class MovieDetailPage extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
-                              // Open trailer (Mock: Search on YouTube)
-                              // In a real app, use url_launcher
-                              final query = Uri.encodeComponent('${movie.title} trailer');
+                              final query = Uri.encodeComponent('${widget.movie.title} trailer');
                               final url = 'https://www.youtube.com/results?search_query=$query';
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Opening trailer for ${movie.title}...'),
+                                  content: Text('Opening trailer for ${widget.movie.title}...'),
                                   action: SnackBarAction(
                                     label: 'Open',
                                     onPressed: () {
-                                      // Logic to open URL would go here if url_launcher was available
                                       print('Launch $url');
                                     },
                                   ),
@@ -150,7 +191,21 @@ class MovieDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                            // Add to Watchlist Logic (Duplicate of AppBar logic, but good for UX)
+                            final provider = Provider.of<WatchlistProvider>(context, listen: false);
+                            if (provider.isInWatchlist(widget.movie.id)) {
+                                provider.removeFromWatchlist(widget.movie.id);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('${widget.movie.title} removed from Watchlist')),
+                                );
+                            } else {
+                                provider.addToWatchlist(widget.movie);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('${widget.movie.title} added to Watchlist')),
+                                );
+                            }
+                        },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.all(12),
                           side: const BorderSide(color: Colors.white54),
@@ -158,7 +213,15 @@ class MovieDetailPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Icon(Icons.add, color: Colors.white),
+                        // Use Consumer to update icon state if needed, or just keep as generic Add/Check
+                        child: Consumer<WatchlistProvider>(
+                          builder: (context, provider, child) {
+                             return Icon(
+                               provider.isInWatchlist(widget.movie.id) ? Icons.check : Icons.add,
+                               color: Colors.white
+                             );
+                          }
+                        ),
                       ),
                       const SizedBox(width: 12),
                        OutlinedButton(
@@ -183,7 +246,7 @@ class MovieDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    movie.overview,
+                    widget.movie.overview,
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
@@ -198,9 +261,30 @@ class MovieDetailPage extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
-                  _buildReviewItem('John Doe', 'Great visuals and amazing story!'),
-                  const SizedBox(height: 16),
-                  _buildReviewItem('Alice Smith', 'The best movie I have seen this year.'),
+                  
+                  // FutureBuilder for Reviews
+                  FutureBuilder<List<Review>>(
+                    future: _reviewsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator(color: Colors.white));
+                      } else if (snapshot.hasError) {
+                        return const Text('Failed to load reviews.', style: TextStyle(color: Colors.white54));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No reviews yet.', style: TextStyle(color: Colors.white54));
+                      }
+
+                      final reviews = snapshot.data!;
+                      return Column(
+                        children: reviews.take(3).map((review) => Column(
+                          children: [
+                             _buildReviewItem(review.author, review.content, review.rating),
+                             const SizedBox(height: 16),
+                          ],
+                        )).toList(),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 50),
                 ],
               ),
@@ -225,7 +309,7 @@ class MovieDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReviewItem(String name, String content) {
+  Widget _buildReviewItem(String name, String content, double rating) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -237,7 +321,7 @@ class MovieDetailPage extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundColor: Colors.white10,
-            child: Text(name[0], style: const TextStyle(color: Colors.white)),
+            child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -247,18 +331,23 @@ class MovieDetailPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
+                    if (rating > 0)
                     Row(
-                      children: const [
-                        Icon(Icons.star, color: Colors.amber, size: 14),
-                        SizedBox(width: 4),
-                        Text('5.0', style: TextStyle(color: Colors.amber)),
+                      children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 14),
+                        const SizedBox(width: 4),
+                        Text(rating.toString(), style: const TextStyle(color: Colors.amber)),
                       ],
                     )
                   ],
@@ -266,6 +355,8 @@ class MovieDetailPage extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   content,
+                  maxLines: 5,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.white60),
                 ),
               ],

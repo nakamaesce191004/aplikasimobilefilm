@@ -28,6 +28,23 @@ class Anime {
       score: (json['score'] ?? 0.0).toDouble(),
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'mal_id': malId,
+      'title': title,
+      'images': {
+        'jpg': {
+          'image_url': image,
+        },
+      },
+      'synopsis': description,
+      'type': type,
+      'aired': {
+        'string': releaseDate,
+      },
+      'score': score,
+    };
+  }
 }
 
 class AnimeEpisode {
