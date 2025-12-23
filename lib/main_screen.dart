@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'home_page_content.dart'; // Import konten halaman home
+import 'anime_page_content.dart'; // Import konten halaman anime
 import 'services/api_service.dart';
+import 'services/anime_service.dart';
+import 'movies_page_content.dart'; // Import konten halaman Movies
 import 'models/movie.dart';
+import 'models/anime.dart';
 import 'movie_detail_page.dart';
+import 'anime_detail_page.dart';
 
 // Daftar kategori untuk TabBar horizontal
 const List<String> categories = [
@@ -30,8 +35,17 @@ class MainScreen extends StatelessWidget {
           physics: BouncingScrollPhysics(),
           children: [
             HomePageContent(), // Konten Halaman Utama di Tab 'Home'
-            Center(child: Text('Series Content', style: TextStyle(color: Colors.white54))),
-            Center(child: Text('Movies Content', style: TextStyle(color: Colors.white54))),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.tv, size: 64, color: Colors.white24),
+                  SizedBox(height: 16),
+                  Text('Series Coming Soon', style: TextStyle(color: Colors.white54, fontSize: 18)),
+                ],
+              ),
+            ),
+            MoviesPageContent(),
           ],
         ),
       ),
@@ -65,7 +79,7 @@ class MainScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.search, size: 26),
                 onPressed: () {
-                  showSearch(context: context, delegate: MovieSearchDelegate());
+                  showSearch(context: context, delegate: UniversalSearchDelegate());
                 },
               ),
               const SizedBox(width: 8),
@@ -117,7 +131,6 @@ class MainScreen extends StatelessWidget {
         currentIndex: 0,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.live_tv_rounded), label: 'Live'),
           BottomNavigationBarItem(
             icon: Icon(Icons.play_circle_outline),
             label: 'Shorts',
@@ -131,8 +144,9 @@ class MainScreen extends StatelessWidget {
   }
 }
 
-class MovieSearchDelegate extends SearchDelegate {
+class UniversalSearchDelegate extends SearchDelegate {
   final ApiService _apiService = ApiService();
+  final AnimeService _animeService = AnimeService();
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -174,42 +188,77 @@ class MovieSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    return FutureBuilder<List<Movie>>(
-      future: _apiService.searchMovies(query),
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([
+        _apiService.searchMovies(query),
+        _animeService.searchAnime(query),
+      ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No movies found', style: TextStyle(color: Colors.white)));
+        }
+
+        final movieResults = (snapshot.data?[0] as List<Movie>?) ?? [];
+        final animeResults = (snapshot.data?[1] as List<Anime>?) ?? [];
+        final combinedResults = [...movieResults, ...animeResults];
+
+        if (combinedResults.isEmpty) {
+          return const Center(child: Text('No results found', style: TextStyle(color: Colors.white)));
         }
 
         return ListView.builder(
-          itemCount: snapshot.data!.length,
+          itemCount: combinedResults.length,
           itemBuilder: (context, index) {
-            final movie = snapshot.data![index];
-            return ListTile(
-              leading: Image.network(
-                movie.fullPosterUrl,
-                width: 50,
-                fit: BoxFit.cover,
-                errorBuilder: (ctx, _, __) => const Icon(Icons.movie, color: Colors.white),
-              ),
-              title: Text(movie.title, style: const TextStyle(color: Colors.white)),
-              subtitle: Text(
-                movie.releaseDate.split('-')[0], 
-                style: const TextStyle(color: Colors.white70)
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MovieDetailPage(movie: movie),
-                  ),
-                );
-              },
-            );
+            final item = combinedResults[index];
+            
+            if (item is Movie) {
+              return ListTile(
+                leading: Image.network(
+                  item.fullPosterUrl,
+                  width: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, _, __) => const Icon(Icons.movie, color: Colors.white),
+                ),
+                title: Text(item.title, style: const TextStyle(color: Colors.white)),
+                subtitle: Text(
+                  'Movie • ${item.releaseDate.split('-')[0]}', 
+                  style: const TextStyle(color: Colors.white70)
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MovieDetailPage(movie: item),
+                    ),
+                  );
+                },
+              );
+            } else if (item is Anime) {
+               return ListTile(
+                leading: Image.network(
+                  item.image,
+                  width: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, _, __) => const Icon(Icons.movie, color: Colors.white),
+                ),
+                title: Text(item.title, style: const TextStyle(color: Colors.white)),
+                subtitle: Text(
+                  'Anime • ${item.score > 0 ? "★ ${item.score}" : ""}', 
+                  style: const TextStyle(color: Colors.white70)
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AnimeDetailPage(anime: item),
+                    ),
+                  );
+                },
+              );
+            }
+            return const SizedBox.shrink();
           },
         );
       },

@@ -118,7 +118,24 @@ class MovieDetailPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                              // Open trailer (Mock: Search on YouTube)
+                              // In a real app, use url_launcher
+                              final query = Uri.encodeComponent('${movie.title} trailer');
+                              final url = 'https://www.youtube.com/results?search_query=$query';
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Opening trailer for ${movie.title}...'),
+                                  action: SnackBarAction(
+                                    label: 'Open',
+                                    onPressed: () {
+                                      // Logic to open URL would go here if url_launcher was available
+                                      print('Launch $url');
+                                    },
+                                  ),
+                                ),
+                              );
+                          },
                           icon: const Icon(Icons.play_arrow_rounded),
                           label: const Text('Watch Trailer'),
                           style: ElevatedButton.styleFrom(

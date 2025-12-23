@@ -1,17 +1,15 @@
-// lib/widgets/movie_section.dart
-
 import 'package:flutter/material.dart';
-import '../../models/movie.dart';
-import 'movie_detail_page.dart';
+import 'models/anime.dart';
+import 'anime_detail_page.dart';
 
-class MovieSection extends StatelessWidget {
+class AnimeSection extends StatelessWidget {
   final String title;
-  final List<Movie> movies;
+  final List<Anime> animeList;
 
-  const MovieSection({
+  const AnimeSection({
     super.key,
     required this.title,
-    required this.movies,
+    required this.animeList,
   });
 
   @override
@@ -66,15 +64,15 @@ class MovieSection extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            itemCount: movies.length,
+            itemCount: animeList.length,
             itemBuilder: (context, index) {
-              final movie = movies[index];
+              final anime = animeList[index];
 
               return Container(
                 width: 150,
                 margin: EdgeInsets.only(
                   left: index == 0 ? 16.0 : 8.0,
-                  right: index == movies.length - 1 ? 16.0 : 0,
+                  right: index == animeList.length - 1 ? 16.0 : 0,
                   bottom: 10,
                 ),
                 child: GestureDetector(
@@ -82,14 +80,14 @@ class MovieSection extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MovieDetailPage(movie: movie),
+                        builder: (context) => AnimeDetailPage(anime: anime),
                       ),
                     );
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Movie Poster Card
+                      // Anime Image Card
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
@@ -102,32 +100,59 @@ class MovieSection extends StatelessWidget {
                               ),
                             ],
                             image: DecorationImage(
-                              image: NetworkImage(movie.fullPosterUrl),
+                              image: NetworkImage(anime.image),
                               fit: BoxFit.cover,
                             ),
                           ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
+                          child: Stack(
+                            children: [
+                              // Score overlay
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.7),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.star, color: Colors.amber, size: 12),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        anime.score.toString(),
+                                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // Play Icon overlay
+                              Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.4),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white54, width: 1.5),
+                                  ),
+                                  child: const Icon(
+                                    Icons.play_arrow_rounded,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
                               ),
                             ],
-                            image: DecorationImage(
-                              image: NetworkImage(movie.fullPosterUrl),
-                              fit: BoxFit.cover,
-                            ),
                           ),
-                        ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Movie Title
+                      // Anime Title
                       Text(
-                        movie.title,
+                        anime.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

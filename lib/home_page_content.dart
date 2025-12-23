@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../models/movie.dart';
-import '../../services/api_service.dart';
+import 'models/movie.dart';
+import 'models/anime.dart';
+import 'services/api_service.dart';
+import 'services/anime_service.dart';
 import 'movie_section.dart';
+import 'anime_section.dart';
+import 'trending_hero_section.dart';
 
 class HomePageContent extends StatefulWidget {
   const HomePageContent({super.key});
@@ -14,14 +18,17 @@ class _HomePageContentState extends State<HomePageContent> {
   late Future<List<Movie>> _trendingMovies;
   late Future<List<Movie>> _popularMovies;
   late Future<List<Movie>> _nowPlayingMovies;
+  late Future<List<Anime>> _topAiringAnime;
 
   @override
   void initState() {
     super.initState();
     final api = ApiService();
+    final animeApi = AnimeService();
     _trendingMovies = api.getTrendingMovies();
     _popularMovies = api.getMoviesByCategory('popular');
     _nowPlayingMovies = api.getMoviesByCategory('now_playing');
+    _topAiringAnime = animeApi.getTopAiring();
   }
 
   @override
@@ -30,10 +37,29 @@ class _HomePageContentState extends State<HomePageContent> {
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 20),
       children: [
-        _buildSectionBuilder('🔥 Trending Now', _trendingMovies),
-        _buildSectionBuilder('Popular', _popularMovies),
+        _buildTrendingSection(),
+        _buildAnimeSectionBuilder('🌟 Top Airing Anime', _topAiringAnime),
+        _buildSectionBuilder('Popular Movies', _popularMovies),
         _buildSectionBuilder('Now Playing', _nowPlayingMovies),
       ],
+    );
+  }
+
+  Widget _buildTrendingSection() {
+    return FutureBuilder<List<Movie>>(
+      future: _trendingMovies,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+           return const SizedBox(
+             height: 400,
+             child: Center(child: CircularProgressIndicator(color: Color(0xFFFF005D))),
+           );
+        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return TrendingHeroSection(movies: snapshot.data!);
+      },
     );
   }
 
@@ -54,30 +80,36 @@ class _HomePageContentState extends State<HomePageContent> {
              ),
            );
         } else if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Error loading $title: ${snapshot.error}',
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
-          );
+          // Hide error sections gracefully or show minimal error
+          return const SizedBox.shrink(); 
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
-             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'No movies found for $title',
-                style: const TextStyle(color: Colors.white54),
-              ),
-            ),
-          );
+          return const SizedBox.shrink();
         }
 
         return MovieSection(
           title: title,
           movies: snapshot.data!,
+        );
+      },
+    );
+  }
+
+  Widget _buildAnimeSectionBuilder(String title, Future<List<Anime>> future) {
+    return FutureBuilder<List<Anime>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+           // Minimal loader for anime section
+           return const SizedBox(height: 100);
+        } else if (snapshot.hasError) {
+          return const SizedBox.shrink();
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+           return const SizedBox.shrink();
+        }
+
+        return AnimeSection(
+          title: title,
+          animeList: snapshot.data!,
         );
       },
     );
