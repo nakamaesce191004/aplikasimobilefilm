@@ -5,11 +5,13 @@ import 'anime_detail_page.dart';
 class AnimeSection extends StatelessWidget {
   final String title;
   final List<Anime> animeList;
+  final VoidCallback? onSeeAllTap;
 
   const AnimeSection({
     super.key,
     required this.title,
     required this.animeList,
+    this.onSeeAllTap,
   });
 
   @override
@@ -31,7 +33,7 @@ class AnimeSection extends StatelessWidget {
                 ),
               ),
               InkWell(
-                onTap: () {},
+                onTap: onSeeAllTap,
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),

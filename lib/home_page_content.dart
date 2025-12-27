@@ -6,6 +6,7 @@ import 'services/anime_service.dart';
 import 'movie_section.dart';
 import 'anime_section.dart';
 import 'trending_hero_section.dart';
+import 'pages/see_all_page.dart';
 
 class HomePageContent extends StatefulWidget {
   const HomePageContent({super.key});
@@ -18,17 +19,20 @@ class _HomePageContentState extends State<HomePageContent> {
   late Future<List<Movie>> _trendingMovies;
   late Future<List<Movie>> _popularMovies;
   late Future<List<Movie>> _nowPlayingMovies;
+  late Future<List<Movie>> _topRatedMovies;
   late Future<List<Anime>> _topAiringAnime;
+
+  final ApiService _api = ApiService();
+  final AnimeService _animeApi = AnimeService();
 
   @override
   void initState() {
     super.initState();
-    final api = ApiService();
-    final animeApi = AnimeService();
-    _trendingMovies = api.getTrendingMovies();
-    _popularMovies = api.getMoviesByCategory('popular');
-    _nowPlayingMovies = api.getMoviesByCategory('now_playing');
-    _topAiringAnime = animeApi.getTopAiring();
+    _trendingMovies = _api.getTrendingMovies();
+    _popularMovies = _api.getMoviesByCategory('popular');
+    _nowPlayingMovies = _api.getMoviesByCategory('now_playing');
+    _topRatedMovies = _api.getMoviesByCategory('top_rated');
+    _topAiringAnime = _animeApi.getTopAiring();
   }
 
   @override
@@ -38,9 +42,14 @@ class _HomePageContentState extends State<HomePageContent> {
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         _buildTrendingSection(),
-        _buildAnimeSectionBuilder('🌟 Top Airing Anime', _topAiringAnime),
-        _buildSectionBuilder('Popular Movies', _popularMovies),
-        _buildSectionBuilder('Now Playing', _nowPlayingMovies),
+        _buildAnimeSectionBuilder('🌟 Top Airing Anime', _topAiringAnime, 
+            (page) => _animeApi.getTopAiring(page: page)),
+        _buildSectionBuilder('Popular Movies', _popularMovies, 
+            (page) => _api.getMoviesByCategory('popular', page: page)),
+        _buildSectionBuilder('Now Playing', _nowPlayingMovies, 
+            (page) => _api.getMoviesByCategory('now_playing', page: page)),
+        _buildSectionBuilder('⭐ Top Rated Movies', _topRatedMovies, 
+            (page) => _api.getMoviesByCategory('top_rated', page: page)),
       ],
     );
   }
@@ -63,7 +72,7 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
-  Widget _buildSectionBuilder(String title, Future<List<Movie>> future) {
+  Widget _buildSectionBuilder(String title, Future<List<Movie>> future, Future<List<Movie>> Function(int) fetchMethod) {
     return FutureBuilder<List<Movie>>(
       future: future,
       builder: (context, snapshot) {
@@ -80,7 +89,6 @@ class _HomePageContentState extends State<HomePageContent> {
              ),
            );
         } else if (snapshot.hasError) {
-          // Hide error sections gracefully or show minimal error
           return const SizedBox.shrink(); 
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const SizedBox.shrink();
@@ -89,17 +97,27 @@ class _HomePageContentState extends State<HomePageContent> {
         return MovieSection(
           title: title,
           movies: snapshot.data!,
+          onSeeAllTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SeeAllPage(
+                  title: title,
+                  fetchMethod: fetchMethod,
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildAnimeSectionBuilder(String title, Future<List<Anime>> future) {
+  Widget _buildAnimeSectionBuilder(String title, Future<List<Anime>> future, Future<List<Anime>> Function(int) fetchMethod) {
     return FutureBuilder<List<Anime>>(
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-           // Minimal loader for anime section
            return const SizedBox(height: 100);
         } else if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -110,6 +128,17 @@ class _HomePageContentState extends State<HomePageContent> {
         return AnimeSection(
           title: title,
           animeList: snapshot.data!,
+          onSeeAllTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SeeAllPage(
+                  title: title,
+                  fetchMethod: fetchMethod,
+                ),
+              ),
+            );
+          },
         );
       },
     );

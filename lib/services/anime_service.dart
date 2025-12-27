@@ -22,9 +22,9 @@ class AnimeService {
     }
   }
 
-  Future<List<Anime>> getTopAiring() async {
+  Future<List<Anime>> getTopAiring({int page = 1}) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/top/anime?filter=airing'));
+      final response = await http.get(Uri.parse('$baseUrl/top/anime?filter=airing&page=$page'));
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);

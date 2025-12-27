@@ -6,8 +6,8 @@ class ApiService {
   final String apiKey = '1f593b971f8e3f13955ba0471d0dac9f';
   final String baseUrl = 'https://api.themoviedb.org/3';
 
-  Future<List<Movie>> getTrendingMovies() async {
-    final response = await http.get(Uri.parse('$baseUrl/trending/movie/day?api_key=$apiKey'));
+  Future<List<Movie>> getTrendingMovies({int page = 1}) async {
+    final response = await http.get(Uri.parse('$baseUrl/trending/movie/day?api_key=$apiKey&page=$page'));
     if (response.statusCode == 200) {
       return _parseMovies(response.body);
     } else {
@@ -15,10 +15,9 @@ class ApiService {
     }
   }
   
-  Future<List<Movie>> getMoviesByCategory(String category) async {
-    // category: 'popular' or 'now_playing'
-    // TMDB endpoints: movie/popular, movie/now_playing
-    final response = await http.get(Uri.parse('$baseUrl/movie/$category?api_key=$apiKey'));
+  Future<List<Movie>> getMoviesByCategory(String category, {int page = 1}) async {
+    // category: 'popular', 'now_playing', 'top_rated'
+    final response = await http.get(Uri.parse('$baseUrl/movie/$category?api_key=$apiKey&page=$page'));
     if (response.statusCode == 200) {
       return _parseMovies(response.body);
     } else {

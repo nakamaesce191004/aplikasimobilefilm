@@ -7,11 +7,13 @@ import 'movie_detail_page.dart';
 class MovieSection extends StatelessWidget {
   final String title;
   final List<Movie> movies;
+  final VoidCallback? onSeeAllTap;
 
   const MovieSection({
     super.key,
     required this.title,
     required this.movies,
+    this.onSeeAllTap,
   });
 
   @override
@@ -33,7 +35,7 @@ class MovieSection extends StatelessWidget {
                 ),
               ),
               InkWell(
-                onTap: () {},
+                onTap: onSeeAllTap,
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
