@@ -39,7 +39,6 @@ class MyApp extends StatelessWidget {
           primary: Color(0xFFFF005D),
           secondary: Color(0xFF00E5FF), // Cyan accent
           surface: Color(0xFF1F1F1F),
-          background: Color(0xFF141414),
         ),
         appBarTheme: AppBarTheme(
           backgroundColor: const Color(0xFF141414),

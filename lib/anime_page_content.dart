@@ -161,7 +161,7 @@ class _AnimePageContentState extends State<AnimePageContent> {
                 ),
               ),
               Text(
-                '${anime.score > 0 ? '★ ${anime.score}' : 'N/A'}',
+                anime.score > 0 ? '★ ${anime.score}' : 'N/A',
                 style: const TextStyle(color: Color(0xFFFF005D), fontSize: 12),
               ),
             ],

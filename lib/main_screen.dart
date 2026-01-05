@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'providers/navigation_provider.dart';
 import 'watchlist_page.dart'; // Add WatchlistPage import
 import 'home_page_content.dart'; // Import konten halaman home
-import 'anime_page_content.dart'; // Import konten halaman anime
+// Import konten halaman anime
 import 'services/api_service.dart';
 import 'services/anime_service.dart';
 import 'movies_page_content.dart'; // Import konten halaman Movies

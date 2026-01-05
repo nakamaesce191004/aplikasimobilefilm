@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async'; // Added for Timer
 import 'package:provider/provider.dart'; // Added for Watchlist
 import 'providers/watchlist_provider.dart'; // Added for Watchlist
-import 'providers/navigation_provider.dart'; // Added for Navigation
-import 'watchlist_page.dart'; // Added for navigation
+// Added for Navigation
+// Added for navigation
 import 'models/movie.dart';
 import 'movie_detail_page.dart';
 

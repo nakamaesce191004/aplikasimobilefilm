@@ -157,7 +157,7 @@ class _SeeAllPageState extends State<SeeAllPage> {
     } else if (item is Anime) {
       imageUrl = item.image;
       title = item.title;
-      rating = item.score?.toString();
+      rating = item.score.toString();
       onTap = () {
          Navigator.push(
             context,
