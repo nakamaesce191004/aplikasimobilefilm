@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../models/movie.dart';
 import 'movie_detail_page.dart';
 
+import 'package:google_fonts/google_fonts.dart'; // Added
+
 class MovieSection extends StatelessWidget {
   final String title;
   final List<Movie> movies;
@@ -28,10 +30,10 @@ class MovieSection extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: GoogleFonts.poppins(
                   fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
               InkWell(
@@ -43,8 +45,8 @@ class MovieSection extends StatelessWidget {
                     children: [
                       Text(
                         'Lihat Semua',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
+                        style: GoogleFonts.inter(
+                          color: Theme.of(context).colorScheme.secondary,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -52,7 +54,7 @@ class MovieSection extends StatelessWidget {
                       const SizedBox(width: 4),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Theme.of(context).colorScheme.secondary,
                         size: 14,
                       ),
                     ],
@@ -64,7 +66,7 @@ class MovieSection extends StatelessWidget {
         ),
 
         SizedBox(
-          height: 240,
+          height: 250, // Slightly taller
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -95,7 +97,7 @@ class MovieSection extends StatelessWidget {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
@@ -108,31 +110,15 @@ class MovieSection extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                           ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                            image: DecorationImage(
-                              image: NetworkImage(movie.fullPosterUrl),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       // Movie Title
                       Text(
                         movie.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,

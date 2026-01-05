@@ -3,21 +3,33 @@ import 'package:mobile_film/webview_player_page.dart';
 import 'package:provider/provider.dart';
 import 'providers/watchlist_provider.dart';
 import 'models/anime.dart';
+import 'models/review.dart'; // Added
 import 'services/anime_service.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AnimeDetailPage extends StatelessWidget {
+class AnimeDetailPage extends StatefulWidget {
   final Anime anime;
 
   const AnimeDetailPage({super.key, required this.anime});
 
+  @override
+  State<AnimeDetailPage> createState() => _AnimeDetailPageState();
+}
 
+class _AnimeDetailPageState extends State<AnimeDetailPage> {
+  late Future<List<Review>> _reviewsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reviewsFuture = AnimeService().getAnimeReviews(widget.anime.malId);
+  }
 
   void _watchAnime(BuildContext context) async {
     final AnimeService service = AnimeService();
-    final url = service.getWatchUrl(anime.title);
+    final url = service.getWatchUrl(widget.anime.title);
     
     // Webview only supports Android and iOS
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
@@ -26,7 +38,7 @@ class AnimeDetailPage extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) => WebViewPlayerPage(
             url: url,
-            title: 'Watch: ${anime.title}',
+            title: 'Watch: ${widget.anime.title}',
           ),
         ),
       );
@@ -58,7 +70,7 @@ class AnimeDetailPage extends StatelessWidget {
             actions: [
                Consumer<WatchlistProvider>(
                 builder: (context, provider, child) {
-                  final isSaved = provider.isAnimeInWatchlist(anime.malId);
+                  final isSaved = provider.isAnimeInWatchlist(widget.anime.malId);
                   return IconButton(
                     icon: Icon(
                       isSaved ? Icons.bookmark : Icons.bookmark_border,
@@ -67,14 +79,14 @@ class AnimeDetailPage extends StatelessWidget {
                     ),
                     onPressed: () {
                       if (isSaved) {
-                        provider.removeAnimeFromWatchlist(anime.malId);
+                        provider.removeAnimeFromWatchlist(widget.anime.malId);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${anime.title} removed from Watchlist')),
+                          SnackBar(content: Text('${widget.anime.title} removed from Watchlist')),
                         );
                       } else {
-                        provider.addAnimeToWatchlist(anime);
+                        provider.addAnimeToWatchlist(widget.anime);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${anime.title} added to Watchlist')),
+                          SnackBar(content: Text('${widget.anime.title} added to Watchlist')),
                         );
                       }
                     },
@@ -85,7 +97,7 @@ class AnimeDetailPage extends StatelessWidget {
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: Image.network(
-                anime.image,
+                widget.anime.image,
                 fit: BoxFit.cover,
                 errorBuilder: (ctx, _, __) => Container(color: Colors.grey[900]),
               ),
@@ -98,7 +110,7 @@ class AnimeDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    anime.title,
+                    widget.anime.title,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -115,20 +127,20 @@ class AnimeDetailPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          'Score: ${anime.score}',
+                          'Score: ${widget.anime.score}',
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '${anime.type} • ${anime.releaseDate}',
+                        '${widget.anime.type} • ${widget.anime.releaseDate}',
                         style: const TextStyle(color: Colors.grey),
                       ),
                     ],
                   ),
                    const SizedBox(height: 16),
                    Text(
-                    anime.description,
+                    widget.anime.description,
                     style: const TextStyle(color: Colors.white70, height: 1.5),
                    ),
                   const SizedBox(height: 24),
@@ -151,8 +163,98 @@ class AnimeDetailPage extends StatelessWidget {
                     'Browse episodes directly within the app.',
                     style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic),
                   ),
+
+                  const SizedBox(height: 32),
+                  // Reviews Section (New)
+                  Text(
+                    'Reviews',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  FutureBuilder<List<Review>>(
+                    future: _reviewsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator(color: Colors.white));
+                      } else if (snapshot.hasError) {
+                        return const Text('Failed to load reviews.', style: TextStyle(color: Colors.white54));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No reviews yet.', style: TextStyle(color: Colors.white54));
+                      }
+
+                      final reviews = snapshot.data!;
+                      return Column(
+                        children: reviews.map((review) => Column(
+                          children: [
+                             _buildReviewItem(review.author, review.content, review.rating),
+                             const SizedBox(height: 16),
+                          ],
+                        )).toList(),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 50),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+   Widget _buildReviewItem(String name, String content, double rating) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            backgroundColor: Colors.white10,
+            child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    if (rating > 0)
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 14),
+                        const SizedBox(width: 4),
+                        Text(rating.toString(), style: const TextStyle(color: Colors.amber)),
+                      ],
+                    )
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  content,
+                  maxLines: 5,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white60),
+                ),
+              ],
             ),
           ),
         ],

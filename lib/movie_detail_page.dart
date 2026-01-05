@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/movie.dart';
+import '../../models/review.dart'; // Added
 import '../../services/api_service.dart'; // Added for fetching reviews
 import 'package:provider/provider.dart';
 import 'providers/watchlist_provider.dart';
@@ -276,7 +277,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
                       final reviews = snapshot.data!;
                       return Column(
-                        children: reviews.take(3).map((review) => Column(
+                        children: reviews.map((review) => Column(
                           children: [
                              _buildReviewItem(review.author, review.content, review.rating),
                              const SizedBox(height: 16),

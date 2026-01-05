@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart'; // Added provider
 import 'providers/watchlist_provider.dart'; // Added WatchlistProvider
 import 'providers/navigation_provider.dart'; // Added NavigationProvider
@@ -36,20 +37,19 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF141414), // Premium Dark Grey
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFFFF005D),
-          secondary: Color(0xFF00E5FF), // Cyan accent for modern feel
+          secondary: Color(0xFF00E5FF), // Cyan accent
           surface: Color(0xFF1F1F1F),
           background: Color(0xFF141414),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF141414),
+        appBarTheme: AppBarTheme(
+          backgroundColor: const Color(0xFF141414),
           elevation: 0,
           centerTitle: false,
-          iconTheme: IconThemeData(color: Colors.white),
-          titleTextStyle: TextStyle(
+          iconTheme: const IconThemeData(color: Colors.white),
+          titleTextStyle: GoogleFonts.poppins(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            fontFamily: 'Roboto', // Default, can be changed if font assets added
           ),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
@@ -57,13 +57,17 @@ class MyApp extends StatelessWidget {
           selectedItemColor: Color(0xFFFF005D),
           unselectedItemColor: Colors.grey,
         ),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.white),
-          bodyMedium: TextStyle(color: Colors.white70),
-          titleLarge: TextStyle(
+        textTheme: TextTheme(
+          bodyLarge: GoogleFonts.inter(color: Colors.white),
+          bodyMedium: GoogleFonts.inter(color: Colors.white70),
+          titleLarge: GoogleFonts.poppins(
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.bold,
+          ),
+          headlineSmall: GoogleFonts.poppins(
+             color: Colors.white,
+             fontWeight: FontWeight.bold,
           ),
         ),
       ),

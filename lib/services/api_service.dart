@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/movie.dart';
 
+import '../models/review.dart'; // Import the new model
+
 class ApiService {
   final String apiKey = '1f593b971f8e3f13955ba0471d0dac9f';
   final String baseUrl = 'https://api.themoviedb.org/3';
@@ -49,23 +51,6 @@ class ApiService {
     final Map<String, dynamic> data = json.decode(responseBody);
     final List<dynamic> results = data['results'];
     return results.map((json) => Movie.fromJson(json)).toList();
-  }
-}
-
-class Review {
-  final String author;
-  final String content;
-  final double rating;
-
-  Review({required this.author, required this.content, required this.rating});
-
-  factory Review.fromJson(Map<String, dynamic> json) {
-    final authorDetails = json['author_details'] ?? {};
-    return Review(
-      author: json['author'] ?? 'Anonymous',
-      content: json['content'] ?? 'No review text.',
-      rating: (authorDetails['rating'] ?? 0.0).toDouble(),
-    );
   }
 }
 

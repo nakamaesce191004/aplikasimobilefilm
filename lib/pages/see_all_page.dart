@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Added
 import '../models/movie.dart';
 import '../models/anime.dart';
 import '../movie_detail_page.dart';
@@ -98,7 +99,7 @@ class _SeeAllPageState extends State<SeeAllPage> {
         centerTitle: true,
         title: Text(
           widget.title,
-          style: const TextStyle(
+          style: GoogleFonts.poppins(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -205,7 +206,11 @@ class _SeeAllPageState extends State<SeeAllPage> {
                             const SizedBox(width: 4),
                             Text(
                               rating,
-                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              style: GoogleFonts.inter(
+                                color: Colors.white, 
+                                fontSize: 10, 
+                                fontWeight: FontWeight.bold
+                              ),
                             ),
                           ],
                         ),
@@ -220,7 +225,7 @@ class _SeeAllPageState extends State<SeeAllPage> {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: GoogleFonts.inter(
               color: Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w600,

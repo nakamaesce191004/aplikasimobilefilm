@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/anime.dart';
+import '../models/review.dart';
 
 class AnimeService {
   final String baseUrl = 'https://api.jikan.moe/v4';
@@ -51,6 +52,23 @@ class AnimeService {
      ));
   }
   
+  Future<List<Review>> getAnimeReviews(int malId) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/anime/$malId/reviews'));
+      
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> results = data['data'];
+        return results.map((json) => Review.fromJikanJson(json)).toList();
+      } else {
+         throw Exception('Failed to load anime reviews');
+      }
+    } catch(e) {
+       print('Error fetching anime reviews: $e');
+       return [];
+    }
+  }
+
   String getWatchUrl(String title) {
     // Fallback to a search on a popular site
     return 'https://gogoanime3.co/search.html?keyword=${Uri.encodeComponent(title)}';

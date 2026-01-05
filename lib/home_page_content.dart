@@ -7,6 +7,7 @@ import 'movie_section.dart';
 import 'anime_section.dart';
 import 'trending_hero_section.dart';
 import 'pages/see_all_page.dart';
+import 'top_rated_section.dart';
 
 class HomePageContent extends StatefulWidget {
   const HomePageContent({super.key});
@@ -48,9 +49,36 @@ class _HomePageContentState extends State<HomePageContent> {
             (page) => _api.getMoviesByCategory('popular', page: page)),
         _buildSectionBuilder('Now Playing', _nowPlayingMovies, 
             (page) => _api.getMoviesByCategory('now_playing', page: page)),
-        _buildSectionBuilder('⭐ Top Rated Movies', _topRatedMovies, 
-            (page) => _api.getMoviesByCategory('top_rated', page: page)),
+        _buildTopRatedSection(), // New distinct section
       ],
+    );
+  }
+
+  Widget _buildTopRatedSection() {
+    return FutureBuilder<List<Movie>>(
+      future: _topRatedMovies,
+      builder: (context, snapshot) {
+         if (snapshot.connectionState == ConnectionState.waiting) {
+           return const SizedBox(height: 280, child: Center(child: CircularProgressIndicator(color: Color(0xFFFF005D))));
+         } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+           return const SizedBox.shrink();
+         }
+         
+         return TopRatedSection(
+           movies: snapshot.data!,
+           onSeeAllTap: () {
+             Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SeeAllPage(
+                  title: '🏆 Top Rated Movies',
+                  fetchMethod: (page) => _api.getMoviesByCategory('top_rated', page: page),
+                ),
+              ),
+            );
+           },
+         );
+      },
     );
   }
 

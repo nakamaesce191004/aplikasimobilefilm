@@ -5,6 +5,7 @@ class Movie {
   final String posterPath;
   final String backdropPath;
   final double voteAverage;
+  final int voteCount; // Added vote count
   final String releaseDate;
 
   Movie({
@@ -14,6 +15,7 @@ class Movie {
     required this.posterPath,
     required this.backdropPath,
     required this.voteAverage,
+    required this.voteCount, 
     required this.releaseDate,
   });
 
@@ -25,6 +27,7 @@ class Movie {
       posterPath: json['poster_path'] ?? '',
       backdropPath: json['backdrop_path'] ?? '',
       voteAverage: (json['vote_average'] ?? 0.0).toDouble(),
+      voteCount: json['vote_count'] ?? 0, // Parse vote count
       releaseDate: json['release_date'] ?? 'Unknown',
     );
   }
@@ -48,6 +51,7 @@ class Movie {
       'poster_path': posterPath,
       'backdrop_path': backdropPath,
       'vote_average': voteAverage,
+      'vote_count': voteCount,
       'release_date': releaseDate,
     };
   }

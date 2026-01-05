@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Added
 import 'models/anime.dart';
 import 'anime_detail_page.dart';
 
@@ -26,10 +27,10 @@ class AnimeSection extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: GoogleFonts.poppins(
                   fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
               InkWell(
@@ -41,8 +42,8 @@ class AnimeSection extends StatelessWidget {
                     children: [
                       Text(
                         'Lihat Semua',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
+                        style: GoogleFonts.inter(
+                          color: Theme.of(context).colorScheme.secondary,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -50,7 +51,7 @@ class AnimeSection extends StatelessWidget {
                       const SizedBox(width: 4),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Theme.of(context).colorScheme.secondary,
                         size: 14,
                       ),
                     ],
@@ -62,7 +63,7 @@ class AnimeSection extends StatelessWidget {
         ),
 
         SizedBox(
-          height: 240,
+          height: 250, // Slightly taller
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -93,7 +94,7 @@ class AnimeSection extends StatelessWidget {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
@@ -113,19 +114,24 @@ class AnimeSection extends StatelessWidget {
                                 top: 8,
                                 right: 8,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.7),
+                                    color: Colors.black.withOpacity(0.8),
                                     borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.white10),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.star, color: Colors.amber, size: 12),
+                                      const Icon(Icons.star_rounded, color: Color(0xFFFFD700), size: 14),
                                       const SizedBox(width: 4),
                                       Text(
                                         anime.score.toString(),
-                                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white, 
+                                          fontSize: 12, 
+                                          fontWeight: FontWeight.bold
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -136,13 +142,13 @@ class AnimeSection extends StatelessWidget {
                             ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       // Anime Title
                       Text(
                         anime.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
