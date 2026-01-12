@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'providers/navigation_provider.dart';
 import 'watchlist_page.dart'; // Add WatchlistPage import
 import 'home_page_content.dart'; // Import konten halaman home
-// Import konten halaman anime
+import 'anime_page_content.dart'; // Import konten halaman anime
 import 'services/api_service.dart';
 import 'services/anime_service.dart';
 import 'movies_page_content.dart'; // Import konten halaman Movies
@@ -42,33 +42,8 @@ class MainScreen extends StatelessWidget {
       case 0:
         return const HomeTabContainer();
       case 1:
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.play_circle_outline, size: 64, color: Colors.white24),
-              SizedBox(height: 16),
-              Text('Shorts Coming Soon', style: TextStyle(color: Colors.white54, fontSize: 18)),
-            ],
-          ),
-        );
-      case 2:
-        // Use WatchlistPage as the tab body.
-        // Important: WatchlistPage has its own Scaffold/AppBar, 
-        // using it as body is fine but might duplicate AppBars if MainScreen had one.
-        // MainScreen has NO AppBar now (moved to HomeTabContainer), so this is perfect.
-        return const WatchlistPage(); 
-      case 3:
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.grid_view_rounded, size: 64, color: Colors.white24),
-              SizedBox(height: 16),
-              Text('More Menu Coming Soon', style: TextStyle(color: Colors.white54, fontSize: 18)),
-            ],
-          ),
-        );
+        // Watchlist is now index 1
+        return const WatchlistPage();
       default:
         return const HomeTabContainer();
     }
@@ -91,9 +66,7 @@ class MainScreen extends StatelessWidget {
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.play_circle_outline), label: 'Shorts'),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark_outline), label: 'Watchlist'), // Changed label to Watchlist
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Lainnya'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark_outline), label: 'Watchlist'),
         ],
       ),
     );
@@ -110,21 +83,12 @@ class HomeTabContainer extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: _buildCustomAppBar(context),
-        body: const TabBarView(
-          physics: BouncingScrollPhysics(),
+        body: TabBarView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            HomePageContent(),
-             Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.tv, size: 64, color: Colors.white24),
-                  SizedBox(height: 16),
-                  Text('Series Coming Soon', style: TextStyle(color: Colors.white54, fontSize: 18)),
-                ],
-              ),
-            ),
-            MoviesPageContent(),
+            const HomePageContent(),
+             const AnimePageContent(), // Use AnimePageContent for Series tab
+            const MoviesPageContent(),
           ],
         ),
       ),
