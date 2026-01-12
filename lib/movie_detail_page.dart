@@ -4,6 +4,7 @@ import '../../models/review.dart'; // Added
 import '../../services/api_service.dart'; // Added for fetching reviews
 import 'package:provider/provider.dart';
 import 'providers/watchlist_provider.dart';
+import 'widgets/comment_section.dart'; // Import CommentSection
 
 class MovieDetailPage extends StatefulWidget {
   final Movie movie;
@@ -257,35 +258,20 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                   const SizedBox(height: 32),
 
                   // Reviews
-                   Text(
-                    'Reviews',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // FutureBuilder for Reviews
+                  // Unified Reviews & Comments Section
                   FutureBuilder<List<Review>>(
                     future: _reviewsFuture,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator(color: Colors.white));
-                      } else if (snapshot.hasError) {
-                        return const Text('Failed to load reviews.', style: TextStyle(color: Colors.white54));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Text('No reviews yet.', style: TextStyle(color: Colors.white54));
-                      }
-
-                      final reviews = snapshot.data!;
-                      return Column(
-                        children: reviews.map((review) => Column(
-                          children: [
-                             _buildReviewItem(review.author, review.content, review.rating),
-                             const SizedBox(height: 16),
-                          ],
-                        )).toList(),
+                      // Pass empty list if loading/error to allow commenting immediately, 
+                      // or wait. Ideally we show comments even if API fails.
+                      final apiReviews = snapshot.data; 
+                      return CommentSection(
+                        contentId: 'movie_${widget.movie.id}', 
+                        apiReviews: apiReviews
                       );
                     },
                   ),
+                  
                   const SizedBox(height: 50),
                 ],
               ),
@@ -310,61 +296,5 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     );
   }
 
-  Widget _buildReviewItem(String name, String content, double rating) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            backgroundColor: Colors.white10,
-            child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    if (rating > 0)
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 14),
-                        const SizedBox(width: 4),
-                        Text(rating.toString(), style: const TextStyle(color: Colors.amber)),
-                      ],
-                    )
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  content,
-                  maxLines: 5,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white60),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

@@ -1,0 +1,51 @@
+import 'package:flutter/material.dart';
+
+class Comment {
+  final String userName;
+  final String text;
+  final DateTime timestamp;
+
+  Comment({
+    required this.userName,
+    required this.text,
+    required this.timestamp,
+  });
+}
+
+class CommentProvider extends ChangeNotifier {
+  // Map contentId -> List<Comment>
+  final Map<String, List<Comment>> _comments = {};
+
+  List<Comment> getComments(String contentId) {
+    if (!_comments.containsKey(contentId)) {
+      return [];
+    }
+    // Return copy to prevent direct modification
+    return List.from(_comments[contentId]!); 
+  }
+
+  void addComment(String contentId, String userName, String text) {
+    if (!_comments.containsKey(contentId)) {
+      _comments[contentId] = [];
+    }
+
+    _comments[contentId]!.insert(0, Comment(
+      userName: userName,
+      text: text,
+      timestamp: DateTime.now(),
+    ));
+
+    notifyListeners();
+  }
+
+  void deleteComment(String contentId, Comment comment) {
+    if (_comments.containsKey(contentId)) {
+      _comments[contentId]!.removeWhere((c) => 
+        c.text == comment.text && 
+        c.timestamp == comment.timestamp && 
+        c.userName == comment.userName
+      );
+      notifyListeners();
+    }
+  }
+}

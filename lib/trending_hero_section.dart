@@ -168,7 +168,7 @@ class _TrendingHeroSectionState extends State<TrendingHeroSection> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      'IMDB ${movie.voteAverage.toStringAsFixed(1)}',
+                                      'TMDb ${movie.voteAverage.toStringAsFixed(1)}',
                                       style: GoogleFonts.inter(
                                         color: Colors.white, 
                                         fontWeight: FontWeight.bold,

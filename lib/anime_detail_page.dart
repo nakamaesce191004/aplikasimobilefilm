@@ -8,6 +8,7 @@ import 'services/anime_service.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'widgets/comment_section.dart'; // Import CommentSection
 
 class AnimeDetailPage extends StatefulWidget {
   final Anime anime;
@@ -166,31 +167,14 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
 
                   const SizedBox(height: 32),
                   // Reviews Section (New)
-                  Text(
-                    'Reviews',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 16),
-                  
+                  // Unified Reviews & Comments Section
                   FutureBuilder<List<Review>>(
                     future: _reviewsFuture,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator(color: Colors.white));
-                      } else if (snapshot.hasError) {
-                        return const Text('Failed to load reviews.', style: TextStyle(color: Colors.white54));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Text('No reviews yet.', style: TextStyle(color: Colors.white54));
-                      }
-
-                      final reviews = snapshot.data!;
-                      return Column(
-                        children: reviews.map((review) => Column(
-                          children: [
-                             _buildReviewItem(review.author, review.content, review.rating),
-                             const SizedBox(height: 16),
-                          ],
-                        )).toList(),
+                      final apiReviews = snapshot.data;
+                      return CommentSection(
+                        contentId: 'anime_${widget.anime.malId}', 
+                        apiReviews: apiReviews
                       );
                     },
                   ),
@@ -204,61 +188,5 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
     );
   }
 
-   Widget _buildReviewItem(String name, String content, double rating) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            backgroundColor: Colors.white10,
-            child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    if (rating > 0)
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 14),
-                        const SizedBox(width: 4),
-                        Text(rating.toString(), style: const TextStyle(color: Colors.amber)),
-                      ],
-                    )
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  content,
-                  maxLines: 5,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white60),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
