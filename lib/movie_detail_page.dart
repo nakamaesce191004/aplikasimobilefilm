@@ -5,6 +5,7 @@ import '../../services/api_service.dart'; // Added for fetching reviews
 import 'package:provider/provider.dart';
 import 'providers/watchlist_provider.dart';
 import 'widgets/comment_section.dart'; // Import CommentSection
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
 class MovieDetailPage extends StatefulWidget {
   final Movie movie;
@@ -164,20 +165,19 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {
+                          onPressed: () async {
                               final query = Uri.encodeComponent('${widget.movie.title} trailer');
-                              final url = 'https://www.youtube.com/results?search_query=$query';
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Opening trailer for ${widget.movie.title}...'),
-                                  action: SnackBarAction(
-                                    label: 'Open',
-                                    onPressed: () {
-                                      print('Launch $url');
-                                    },
-                                  ),
-                                ),
-                              );
+                              final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
+                              
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url, mode: LaunchMode.externalApplication);
+                              } else {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Could not launch YouTube')),
+                                  );
+                                }
+                              }
                           },
                           icon: const Icon(Icons.play_arrow_rounded),
                           label: const Text('Watch Trailer'),

@@ -69,8 +69,4 @@ class AnimeService {
     }
   }
 
-  String getWatchUrl(String title) {
-    // Fallback to a search on a popular site
-    return 'https://gogoanime3.co/search.html?keyword=${Uri.encodeComponent(title)}';
-  }
 }

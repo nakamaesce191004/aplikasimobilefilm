@@ -8,6 +8,7 @@ import 'models/movie.dart';
 import 'movie_detail_page.dart';
 
 import 'package:google_fonts/google_fonts.dart'; // Added
+import 'package:url_launcher/url_launcher.dart'; // Added for trailer
 
 class TrendingHeroSection extends StatefulWidget {
   final List<Movie> movies;
@@ -186,9 +187,15 @@ class _TrendingHeroSectionState extends State<TrendingHeroSection> {
                               const SizedBox(height: 20),
                               Row(
                                 children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: () {}, // Todo: Play Trailer
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: () async {
+                                           final query = Uri.encodeComponent('${movie.title} trailer');
+                                           final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
+                                           if (await canLaunchUrl(url)) {
+                                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                                           }
+                                        }, // Plays Trailer on YouTube
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Theme.of(context).primaryColor,
                                         foregroundColor: Colors.white,

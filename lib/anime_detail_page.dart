@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_film/webview_player_page.dart';
+
 import 'package:provider/provider.dart';
 import 'providers/watchlist_provider.dart';
 import 'models/anime.dart';
@@ -28,32 +28,17 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
     _reviewsFuture = AnimeService().getAnimeReviews(widget.anime.malId);
   }
 
-  void _watchAnime(BuildContext context) async {
-    final AnimeService service = AnimeService();
-    final url = service.getWatchUrl(widget.anime.title);
+  void _watchTrailer(BuildContext context) async {
+    final query = Uri.encodeComponent('${widget.anime.title} trailer');
+    final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
     
-    // Webview only supports Android and iOS
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => WebViewPlayerPage(
-            url: url,
-            title: 'Watch: ${widget.anime.title}',
-          ),
-        ),
-      );
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
-      // Fallback for Windows/Web/Desktop
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not launch streaming URL')),
-          );
-        }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch YouTube')),
+        );
       }
     }
   }
@@ -148,9 +133,9 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () => _watchAnime(context),
-                      icon: const Icon(Icons.play_circle_fill),
-                      label: const Text('Watch in App'),
+                      onPressed: () => _watchTrailer(context),
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Watch Trailer'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF005D),
                         foregroundColor: Colors.white,
@@ -161,7 +146,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Browse episodes directly within the app.',
+                    'Watch official trailer on YouTube.',
                     style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic),
                   ),
 
