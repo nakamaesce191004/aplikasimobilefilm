@@ -114,33 +114,15 @@ class HomeTabContainer extends StatelessWidget {
               ),
             ),
           ),
-          Row(
-            children: <Widget>[
               IconButton(
                 icon: const Icon(Icons.search, size: 26),
                 onPressed: () {
                   showSearch(context: context, delegate: UniversalSearchDelegate());
                 },
               ),
-              const SizedBox(width: 8),
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF005D), Color(0xFF00E5FF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5),
-                ),
-                child: const Icon(Icons.person, size: 18, color: Colors.white),
-              ),
             ],
           ),
-        ],
-      ),
+
       bottom: TabBar(
         isScrollable: true,
         physics: const BouncingScrollPhysics(),

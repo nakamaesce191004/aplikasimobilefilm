@@ -212,7 +212,7 @@ class _TrendingHeroSectionState extends State<TrendingHeroSection> {
                                           const Icon(Icons.play_circle_fill, size: 20),
                                           const SizedBox(width: 8),
                                           Text(
-                                            'Play Trailer',
+                                            'Watch Trailer',
                                             style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16),
                                           ),
                                         ],

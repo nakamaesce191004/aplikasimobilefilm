@@ -12,45 +12,60 @@ class AnimePageContent extends StatefulWidget {
 
 class _AnimePageContentState extends State<AnimePageContent> {
   final AnimeService _animeService = AnimeService();
-  late Future<List<Anime>> _topAiringFuture;
-  final TextEditingController _searchController = TextEditingController();
-  List<Anime>? _searchResults;
-  bool _isSearching = false;
+  final ScrollController _scrollController = ScrollController();
+  final List<Anime> _animes = [];
+  
+  bool _isLoading = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
 
   @override
   void initState() {
     super.initState();
-    _topAiringFuture = _animeService.getTopAiring();
+    _fetchAnime();
+    _scrollController.addListener(_onScroll);
   }
 
-  void _performSearch() async {
-    if (_searchController.text.isEmpty) {
-      setState(() {
-        _isSearching = false;
-        _searchResults = null;
-      });
-      return;
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && !_isLoading && _hasMore) {
+      _fetchAnime();
     }
+  }
+
+  Future<void> _fetchAnime() async {
+    if (_isLoading) return;
 
     setState(() {
-      _isSearching = true;
+      _isLoading = true;
     });
 
     try {
-      final results = await _animeService.searchAnime(_searchController.text);
+      final newAnimes = await _animeService.getTopAiring(page: _currentPage);
+      
       setState(() {
-        _searchResults = results;
+        if (newAnimes.isEmpty) {
+          _hasMore = false;
+        } else {
+          _animes.addAll(newAnimes);
+          _currentPage++;
+        }
       });
     } catch (e) {
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error searching: $e')),
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('Error loading anime: $e')),
         );
       }
     } finally {
       if (mounted) {
         setState(() {
-          _isSearching = false;
+          _isLoading = false;
         });
       }
     }
@@ -58,60 +73,17 @@ class _AnimePageContentState extends State<AnimePageContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            controller: _searchController,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: 'Search Anime (Jikan API)...',
-              hintStyle: const TextStyle(color: Colors.grey),
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
-              filled: true,
-              fillColor: Colors.grey[900],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.arrow_forward, color: Color(0xFFFF005D)),
-                onPressed: _performSearch,
-              ),
-            ),
-            onSubmitted: (_) => _performSearch(),
-          ),
-        ),
-        Expanded(
-          child: _isSearching
-              ? const Center(child: CircularProgressIndicator())
-              : _searchResults != null
-                  ? _buildAnimeList(_searchResults!)
-                  : FutureBuilder<List<Anime>>(
-                      future: _topAiringFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}',
-                                  style: const TextStyle(color: Colors.white)));
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(
-                              child: Text('No anime found',
-                                  style: TextStyle(color: Colors.white)));
-                        }
-                        return _buildAnimeList(snapshot.data!);
-                      },
-                    ),
-        ),
-      ],
-    );
-  }
+    if (_animes.isEmpty && _isLoading) {
+       return const Center(child: CircularProgressIndicator());
+    }
+    
+    // Initial error or empty state (optional to handle better)
+    if (_animes.isEmpty && !_hasMore) {
+       return const Center(child: Text('No anime found', style: TextStyle(color: Colors.white)));
+    }
 
-  Widget _buildAnimeList(List<Anime> animes) {
     return GridView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -119,9 +91,13 @@ class _AnimePageContentState extends State<AnimePageContent> {
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: animes.length,
+      itemCount: _animes.length + (_hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        final anime = animes[index];
+        if (index == _animes.length) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final anime = _animes[index];
         return GestureDetector(
           onTap: () {
             Navigator.push(
