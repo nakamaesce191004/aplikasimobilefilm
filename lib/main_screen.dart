@@ -8,8 +8,7 @@ import 'services/api_service.dart';
 import 'services/anime_service.dart';
 import 'models/movie.dart';
 import 'models/anime.dart';
-import 'movie_detail_page.dart';
-import 'anime_detail_page.dart';
+import 'pages/content_detail_page.dart';
 
 // Daftar kategori untuk TabBar horizontal
 const List<String> categories = [
@@ -223,7 +222,7 @@ class UniversalSearchDelegate extends SearchDelegate {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MovieDetailPage(movie: item),
+                      builder: (context) => ContentDetailPage(content: item),
                     ),
                   );
                 },
@@ -245,7 +244,7 @@ class UniversalSearchDelegate extends SearchDelegate {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AnimeDetailPage(anime: item),
+                      builder: (context) => ContentDetailPage(content: item),
                     ),
                   );
                 },

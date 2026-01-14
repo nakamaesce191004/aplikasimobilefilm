@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/movie.dart';
 import '../models/anime.dart';
 import '../widgets/content_section.dart'; // Reuse for item card logic if needed, or build custom grid item
-import '../movie_detail_page.dart';
-import '../anime_detail_page.dart';
+import '../pages/content_detail_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ContentGridPage extends StatefulWidget {
@@ -127,7 +126,7 @@ class _ContentGridPageState extends State<ContentGridPage> {
       onTap = () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MovieDetailPage(movie: item)),
+          MaterialPageRoute(builder: (context) => ContentDetailPage(content: item)),
         );
       };
     } else if (item is Anime) {
@@ -136,7 +135,7 @@ class _ContentGridPageState extends State<ContentGridPage> {
       onTap = () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AnimeDetailPage(anime: item)),
+          MaterialPageRoute(builder: (context) => ContentDetailPage(content: item)),
         );
       };
     }

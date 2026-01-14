@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart'; // Added
 import 'models/movie.dart';
-import 'movie_detail_page.dart';
+import 'pages/content_detail_page.dart';
 
 class TopRatedSection extends StatelessWidget {
   final List<Movie> movies;
@@ -77,7 +77,7 @@ class TopRatedSection extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MovieDetailPage(movie: movie),
+                        builder: (context) => ContentDetailPage(content: movie),
                       ),
                     );
                   },

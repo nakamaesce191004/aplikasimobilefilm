@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart'; // Added
 import '../models/movie.dart';
 import '../models/anime.dart';
-import '../movie_detail_page.dart';
-import '../anime_detail_page.dart';
+import '../pages/content_detail_page.dart';
 
 class SeeAllPage extends StatefulWidget {
   final String title;
@@ -151,7 +150,7 @@ class _SeeAllPageState extends State<SeeAllPage> {
       onTap = () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MovieDetailPage(movie: item)),
+          MaterialPageRoute(builder: (context) => ContentDetailPage(content: item)),
         );
       };
     } else if (item is Anime) {
@@ -161,7 +160,7 @@ class _SeeAllPageState extends State<SeeAllPage> {
       onTap = () {
          Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AnimeDetailPage(anime: item)),
+            MaterialPageRoute(builder: (context) => ContentDetailPage(content: item)),
           );
       };
     }

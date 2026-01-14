@@ -1,28 +1,61 @@
 import 'package:flutter/material.dart';
-import '../../models/movie.dart';
-import '../../models/review.dart'; // Added
-import '../../services/api_service.dart'; // Added for fetching reviews
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'providers/watchlist_provider.dart';
-import 'widgets/comment_section.dart'; // Import CommentSection
-import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
+import '../models/movie.dart';
+import '../models/anime.dart';
+import '../models/review.dart';
+import '../services/api_service.dart';
+import '../services/anime_service.dart';
+import '../providers/watchlist_provider.dart';
+import '../widgets/comment_section.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class MovieDetailPage extends ConsumerStatefulWidget {
-  final Movie movie;
+class ContentDetailPage extends ConsumerStatefulWidget {
+  final dynamic content; // Accepts Movie or Anime
 
-  const MovieDetailPage({super.key, required this.movie});
+  const ContentDetailPage({super.key, required this.content});
 
   @override
-  ConsumerState<MovieDetailPage> createState() => _MovieDetailPageState();
+  ConsumerState<ContentDetailPage> createState() => _ContentDetailPageState();
 }
 
-class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
+class _ContentDetailPageState extends ConsumerState<ContentDetailPage> {
   late Future<List<Review>> _reviewsFuture;
+
+  bool get isMovie => widget.content is Movie;
+  bool get isAnime => widget.content is Anime;
 
   @override
   void initState() {
     super.initState();
-    _reviewsFuture = ApiService().getMovieReviews(widget.movie.id);
+    if (isMovie) {
+      _reviewsFuture = ApiService().getMovieReviews((widget.content as Movie).id);
+    } else if (isAnime) {
+      _reviewsFuture = AnimeService().getAnimeReviews((widget.content as Anime).malId);
+    }
+  }
+
+  // Getters for unified data access
+  String get title => isMovie ? (widget.content as Movie).title : (widget.content as Anime).title;
+  String get posterUrl => isMovie ? (widget.content as Movie).fullPosterUrl : (widget.content as Anime).image;
+  String get backdropUrl => isMovie ? (widget.content as Movie).fullBackdropUrl : (widget.content as Anime).image; // Anime uses same image usually
+  String get overview => isMovie ? (widget.content as Movie).overview : (widget.content as Anime).description;
+  String get rating => isMovie ? (widget.content as Movie).voteAverage.toStringAsFixed(1) : (widget.content as Anime).score.toString();
+  String get releaseDate => isMovie ? (widget.content as Movie).releaseDate : (widget.content as Anime).releaseDate;
+  String get contentId => isMovie ? 'movie_${(widget.content as Movie).id}' : 'anime_${(widget.content as Anime).malId}';
+
+  void _watchTrailer(BuildContext context) async {
+    final query = Uri.encodeComponent('$title trailer');
+    final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
+    
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch YouTube')),
+        );
+      }
+    }
   }
 
   @override
@@ -41,7 +74,13 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                Consumer(
                 builder: (context, ref, child) {
                   final provider = ref.watch(watchlistProvider);
-                  final isSaved = provider.isInWatchlist(widget.movie.id);
+                  bool isSaved = false;
+                  if (isMovie) {
+                    isSaved = provider.isInWatchlist((widget.content as Movie).id);
+                  } else {
+                    isSaved = provider.isAnimeInWatchlist((widget.content as Anime).malId);
+                  }
+
                   return IconButton(
                     icon: Icon(
                       isSaved ? Icons.bookmark : Icons.bookmark_border,
@@ -50,14 +89,22 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                     ),
                     onPressed: () {
                       if (isSaved) {
-                        provider.removeFromWatchlist(widget.movie.id);
+                        if (isMovie) {
+                           provider.removeFromWatchlist((widget.content as Movie).id);
+                        } else {
+                           provider.removeAnimeFromWatchlist((widget.content as Anime).malId);
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${widget.movie.title} removed from Watchlist')),
+                          SnackBar(content: Text('$title removed from Watchlist')),
                         );
                       } else {
-                        provider.addToWatchlist(widget.movie);
+                        if (isMovie) {
+                           provider.addToWatchlist(widget.content as Movie);
+                        } else {
+                           provider.addAnimeToWatchlist(widget.content as Anime);
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${widget.movie.title} added to Watchlist')),
+                          SnackBar(content: Text('$title added to Watchlist')),
                         );
                       }
                     },
@@ -69,7 +116,7 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               title: Text(
-                widget.movie.title,
+                title,
                 textScaleFactor: 1.0,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
@@ -83,7 +130,7 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    widget.movie.fullBackdropUrl,
+                    backdropUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (ctx, _, __) => Container(
                       color: Colors.grey.shade900,
@@ -114,9 +161,11 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                   // Meta Info Row
                   Row(
                     children: [
-                      _buildTag(widget.movie.releaseDate.split('-').first),
-                      const SizedBox(width: 8),
-                      _buildTag('Movie'), // Type hardcoded for now
+                      if (releaseDate.isNotEmpty) ...[
+                        _buildTag(releaseDate.split(RegExp(r'[- ]')).first),
+                         const SizedBox(width: 8),
+                      ],
+                      _buildTag(isMovie ? 'Movie' : 'Anime'), 
                       const SizedBox(width: 8),
                       const Spacer(),
                       const Icon(Icons.hd, color: Colors.white54),
@@ -129,7 +178,7 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        widget.movie.voteAverage.toStringAsFixed(1),
+                        rating,
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontSize: 48,
@@ -151,9 +200,9 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'TMDb Rating',
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          Text(
+                            isMovie ? 'TMDb Rating' : 'Score',
+                            style: const TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                         ],
                       ),
@@ -166,20 +215,7 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () async {
-                              final query = Uri.encodeComponent('${widget.movie.title} trailer');
-                              final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
-                              
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url, mode: LaunchMode.externalApplication);
-                              } else {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Could not launch YouTube')),
-                                  );
-                                }
-                              }
-                          },
+                          onPressed: () => _watchTrailer(context),
                           icon: const Icon(Icons.play_arrow_rounded),
                           label: const Text('Watch Trailer'),
                           style: ElevatedButton.styleFrom(
@@ -195,17 +231,24 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                       const SizedBox(width: 12),
                       OutlinedButton(
                         onPressed: () {
-                            // Add to Watchlist Logic (Duplicate of AppBar logic, but good for UX)
-                            final provider = ref.read(watchlistProvider);
-                            if (provider.isInWatchlist(widget.movie.id)) {
-                                provider.removeFromWatchlist(widget.movie.id);
+                             final provider = ref.read(watchlistProvider);
+                             bool isSaved = false;
+                             if (isMovie) isSaved = provider.isInWatchlist((widget.content as Movie).id);
+                             else isSaved = provider.isAnimeInWatchlist((widget.content as Anime).malId);
+
+                            if (isSaved) {
+                                if (isMovie) provider.removeFromWatchlist((widget.content as Movie).id);
+                                else provider.removeAnimeFromWatchlist((widget.content as Anime).malId);
+                                
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('${widget.movie.title} removed from Watchlist')),
+                                  SnackBar(content: Text('$title removed from Watchlist')),
                                 );
                             } else {
-                                provider.addToWatchlist(widget.movie);
+                                if (isMovie) provider.addToWatchlist(widget.content as Movie);
+                                else provider.addAnimeToWatchlist(widget.content as Anime);
+
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('${widget.movie.title} added to Watchlist')),
+                                  SnackBar(content: Text('$title added to Watchlist')),
                                 );
                             }
                         },
@@ -216,20 +259,23 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        // Use Consumer to update icon state if needed, or just keep as generic Add/Check
                         child: Consumer(
                           builder: (context, ref, child) {
                              final provider = ref.watch(watchlistProvider);
+                             bool isSaved = false;
+                             if (isMovie) isSaved = provider.isInWatchlist((widget.content as Movie).id);
+                             else isSaved = provider.isAnimeInWatchlist((widget.content as Anime).malId);
+
                              return Icon(
-                               provider.isInWatchlist(widget.movie.id) ? Icons.check : Icons.add,
+                               isSaved ? Icons.check : Icons.add,
                                color: Colors.white
                              );
                           }
                         ),
                       ),
-                      const SizedBox(width: 12),
+                       const SizedBox(width: 12),
                        OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () {}, // Share logic placeholder
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.all(12),
                           side: const BorderSide(color: Colors.white54),
@@ -250,7 +296,7 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    widget.movie.overview,
+                    overview,
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
@@ -259,16 +305,13 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Reviews
                   // Unified Reviews & Comments Section
                   FutureBuilder<List<Review>>(
                     future: _reviewsFuture,
                     builder: (context, snapshot) {
-                      // Pass empty list if loading/error to allow commenting immediately, 
-                      // or wait. Ideally we show comments even if API fails.
                       final apiReviews = snapshot.data; 
                       return CommentSection(
-                        contentId: 'movie_${widget.movie.id}', 
+                        contentId: contentId, 
                         apiReviews: apiReviews
                       );
                     },
@@ -297,6 +340,4 @@ class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
       ),
     );
   }
-
-
 }

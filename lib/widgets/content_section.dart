@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/movie.dart';
 import '../models/anime.dart';
-import '../movie_detail_page.dart';
-import '../anime_detail_page.dart';
+import '../pages/content_detail_page.dart';
 
 class ContentSection extends StatelessWidget {
   final String title;
@@ -93,7 +92,7 @@ class ContentSection extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MovieDetailPage(movie: item),
+            builder: (context) => ContentDetailPage(content: item),
           ),
         );
       };
@@ -105,7 +104,7 @@ class ContentSection extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AnimeDetailPage(anime: item),
+            builder: (context) => ContentDetailPage(content: item),
           ),
         );
       };
