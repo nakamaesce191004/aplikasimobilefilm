@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart'; // Added provider
-import 'providers/watchlist_provider.dart'; // Added WatchlistProvider
-import 'providers/navigation_provider.dart'; // Added NavigationProvider
-import 'providers/comment_provider.dart'; // Added CommentProvider
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Changed to flutter_riverpod
 import 'main_screen.dart';
 
 void main() {
@@ -14,13 +11,8 @@ void main() {
     statusBarIconBrightness: Brightness.light,
   ));
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => WatchlistProvider()),
-        ChangeNotifierProvider(create: (_) => NavigationProvider()),
-        ChangeNotifierProvider(create: (_) => CommentProvider()),
-      ],
-      child: const MyApp(),
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }

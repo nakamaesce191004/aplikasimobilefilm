@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final commentProvider = ChangeNotifierProvider<CommentProvider>((ref) {
+  return CommentProvider();
+});
 
 class Comment {
   final String userName;

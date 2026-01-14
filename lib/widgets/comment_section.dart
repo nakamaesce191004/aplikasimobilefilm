@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/comment_provider.dart';
 import '../models/review.dart'; // Import Review model
 
-class CommentSection extends StatefulWidget {
+class CommentSection extends ConsumerStatefulWidget {
   final String contentId;
   final List<Review>? apiReviews; // Optional API reviews
 
   const CommentSection({super.key, required this.contentId, this.apiReviews});
 
   @override
-  State<CommentSection> createState() => _CommentSectionState();
+  ConsumerState<CommentSection> createState() => _CommentSectionState();
 }
 
-class _CommentSectionState extends State<CommentSection> {
+class _CommentSectionState extends ConsumerState<CommentSection> {
   final TextEditingController _commentController = TextEditingController();
 
   @override
@@ -25,7 +25,7 @@ class _CommentSectionState extends State<CommentSection> {
   void _submitComment() {
     if (_commentController.text.trim().isEmpty) return;
 
-    Provider.of<CommentProvider>(context, listen: false).addComment(
+    ref.read(commentProvider).addComment(
       widget.contentId,
       'You', 
       _commentController.text.trim(),
@@ -49,7 +49,7 @@ class _CommentSectionState extends State<CommentSection> {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<CommentProvider>(context, listen: false).deleteComment(widget.contentId, comment);
+              ref.read(commentProvider).deleteComment(widget.contentId, comment);
               Navigator.pop(context);
             },
             child: const Text('Delete', style: TextStyle(color: Color(0xFFFF005D))),
@@ -105,9 +105,10 @@ class _CommentSectionState extends State<CommentSection> {
         ),
         const SizedBox(height: 16),
         // Combined List
-        Consumer<CommentProvider>(
-          builder: (context, commentProvider, child) {
-            final localComments = commentProvider.getComments(widget.contentId);
+        Consumer(
+          builder: (context, ref, child) {
+            final commentProviderState = ref.watch(commentProvider);
+            final localComments = commentProviderState.getComments(widget.contentId);
             final apiReviews = widget.apiReviews ?? [];
             
             // Combine: Local comments first (typically user wants to see their own), then API reviews

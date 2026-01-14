@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async'; // Added for Timer
-import 'package:provider/provider.dart'; // Added for Watchlist
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Added for Watchlist
 import 'providers/watchlist_provider.dart'; // Added for Watchlist
 // Added for Navigation
 // Added for navigation
@@ -225,9 +225,10 @@ class _TrendingHeroSectionState extends State<TrendingHeroSection> {
                                       border: Border.all(color: Colors.white30, width: 2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: Consumer<WatchlistProvider>(
-                                      builder: (context, watchlistProvider, child) {
-                                        final bool isInWatchlist = watchlistProvider.isInWatchlist(movie.id);
+                                    child: Consumer(
+                                      builder: (context, ref, child) {
+                                        final watchlistProviderRef = ref.watch(watchlistProvider);
+                                        final bool isInWatchlist = watchlistProviderRef.isInWatchlist(movie.id);
                                         return IconButton(
                                           icon: Icon(
                                             isInWatchlist ? Icons.bookmark : Icons.bookmark_outline,
@@ -235,7 +236,7 @@ class _TrendingHeroSectionState extends State<TrendingHeroSection> {
                                           ),
                                           onPressed: () {
                                             if (isInWatchlist) {
-                                              watchlistProvider.removeFromWatchlist(movie.id);
+                                              watchlistProviderRef.removeFromWatchlist(movie.id);
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                  SnackBar(
                                                    content: Text('${movie.title} removed from Watchlist'),
@@ -245,7 +246,7 @@ class _TrendingHeroSectionState extends State<TrendingHeroSection> {
                                                  ),
                                               );
                                             } else {
-                                              watchlistProvider.addToWatchlist(movie);
+                                              watchlistProviderRef.addToWatchlist(movie);
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                  SnackBar(
                                                    content: Text('${movie.title} added to Watchlist'),

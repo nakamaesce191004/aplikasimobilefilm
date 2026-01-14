@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/watchlist_provider.dart';
 import 'models/anime.dart';
 import 'models/review.dart'; // Added
@@ -8,16 +7,16 @@ import 'services/anime_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'widgets/comment_section.dart'; // Import CommentSection
 
-class AnimeDetailPage extends StatefulWidget {
+class AnimeDetailPage extends ConsumerStatefulWidget {
   final Anime anime;
 
   const AnimeDetailPage({super.key, required this.anime});
 
   @override
-  State<AnimeDetailPage> createState() => _AnimeDetailPageState();
+  ConsumerState<AnimeDetailPage> createState() => _AnimeDetailPageState();
 }
 
-class _AnimeDetailPageState extends State<AnimeDetailPage> {
+class _AnimeDetailPageState extends ConsumerState<AnimeDetailPage> {
   late Future<List<Review>> _reviewsFuture;
 
   @override
@@ -52,8 +51,9 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
             pinned: true,
             backgroundColor: const Color(0xFF141414),
             actions: [
-               Consumer<WatchlistProvider>(
-                builder: (context, provider, child) {
+               Consumer(
+                builder: (context, ref, child) {
+                  final provider = ref.watch(watchlistProvider);
                   final isSaved = provider.isAnimeInWatchlist(widget.anime.malId);
                   return IconButton(
                     icon: Icon(

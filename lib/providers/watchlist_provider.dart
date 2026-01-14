@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/movie.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/anime.dart';
+
+final watchlistProvider = ChangeNotifierProvider<WatchlistProvider>((ref) {
+  return WatchlistProvider();
+});
 
 class WatchlistProvider extends ChangeNotifier {
   List<Movie> _watchlist = [];

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/watchlist_provider.dart';
 import 'movie_detail_page.dart';
 import 'anime_detail_page.dart';
 import 'models/movie.dart';
 import 'models/anime.dart'; // Import Anime model
 
-class WatchlistPage extends StatelessWidget {
+class WatchlistPage extends ConsumerWidget {
   const WatchlistPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -31,87 +31,81 @@ class WatchlistPage extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            _buildMovieWatchlist(context),
-            _buildAnimeWatchlist(context),
+            _buildMovieWatchlist(context, ref),
+            _buildAnimeWatchlist(context, ref),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMovieWatchlist(BuildContext context) {
-    return Consumer<WatchlistProvider>(
-      builder: (context, watchlistProvider, child) {
-        final movies = watchlistProvider.watchlist;
-        
-        if (movies.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.movie_creation_outlined, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text('Your movies watchlist is empty', style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-          );
-        }
+  Widget _buildMovieWatchlist(BuildContext context, WidgetRef ref) {
+    final watchlistProviderRef = ref.watch(watchlistProvider);
+    final movies = watchlistProviderRef.watchlist;
+      
+    if (movies.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.movie_creation_outlined, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('Your movies watchlist is empty', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.7,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: movies.length,
-          itemBuilder: (context, index) {
-            final movie = movies[index];
-            return _buildMovieCard(context, movie);
-          },
-        );
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: movies.length,
+      itemBuilder: (context, index) {
+        final movie = movies[index];
+        return _buildMovieCard(context, ref, movie);
       },
     );
   }
 
-  Widget _buildAnimeWatchlist(BuildContext context) {
-    return Consumer<WatchlistProvider>(
-      builder: (context, watchlistProvider, child) {
-        final animes = watchlistProvider.animeWatchlist;
-        
-        if (animes.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.tv, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text('Your anime watchlist is empty', style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-          );
-        }
+  Widget _buildAnimeWatchlist(BuildContext context, WidgetRef ref) {
+    final watchlistProviderRef = ref.watch(watchlistProvider);
+    final animes = watchlistProviderRef.animeWatchlist;
+    
+    if (animes.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.tv, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('Your anime watchlist is empty', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.7,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: animes.length,
-          itemBuilder: (context, index) {
-            final anime = animes[index];
-            return _buildAnimeCard(context, anime);
-          },
-        );
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: animes.length,
+      itemBuilder: (context, index) {
+        final anime = animes[index];
+        return _buildAnimeCard(context, ref, anime);
       },
     );
   }
 
-  Widget _buildMovieCard(BuildContext context, Movie movie) {
+  Widget _buildMovieCard(BuildContext context, WidgetRef ref, Movie movie) {
     return Stack(
       children: [
          GestureDetector(
@@ -163,7 +157,7 @@ class WatchlistPage extends StatelessWidget {
            right: 4,
            child: GestureDetector(
              onTap: () {
-               Provider.of<WatchlistProvider>(context, listen: false).removeFromWatchlist(movie.id);
+               ref.read(watchlistProvider).removeFromWatchlist(movie.id);
                ScaffoldMessenger.of(context).showSnackBar(
                  SnackBar(content: Text('${movie.title} removed from Watchlist')),
                );
@@ -182,7 +176,7 @@ class WatchlistPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAnimeCard(BuildContext context, Anime anime) {
+  Widget _buildAnimeCard(BuildContext context, WidgetRef ref, Anime anime) {
     return Stack(
       children: [
          GestureDetector(
@@ -234,7 +228,7 @@ class WatchlistPage extends StatelessWidget {
            right: 4,
            child: GestureDetector(
              onTap: () {
-               Provider.of<WatchlistProvider>(context, listen: false).removeAnimeFromWatchlist(anime.malId);
+               ref.read(watchlistProvider).removeAnimeFromWatchlist(anime.malId);
                ScaffoldMessenger.of(context).showSnackBar(
                  SnackBar(content: Text('${anime.title} removed from Watchlist')),
                );

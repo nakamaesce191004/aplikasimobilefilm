@@ -3,8 +3,7 @@ import 'models/movie.dart';
 import 'models/anime.dart';
 import 'services/api_service.dart';
 import 'services/anime_service.dart';
-import 'movie_section.dart';
-import 'anime_section.dart';
+import 'widgets/content_section.dart';
 import 'trending_hero_section.dart';
 import 'pages/see_all_page.dart';
 import 'top_rated_section.dart';
@@ -122,9 +121,9 @@ class _HomePageContentState extends State<HomePageContent> {
           return const SizedBox.shrink();
         }
 
-        return MovieSection(
+        return ContentSection(
           title: title,
-          movies: snapshot.data!,
+          items: snapshot.data!,
           onSeeAllTap: () {
             Navigator.push(
               context,
@@ -153,9 +152,9 @@ class _HomePageContentState extends State<HomePageContent> {
            return const SizedBox.shrink();
         }
 
-        return AnimeSection(
+        return ContentSection(
           title: title,
-          animeList: snapshot.data!,
+          items: snapshot.data!,
           onSeeAllTap: () {
             Navigator.push(
               context,

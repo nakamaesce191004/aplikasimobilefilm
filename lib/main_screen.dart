@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/navigation_provider.dart';
 import 'watchlist_page.dart'; // Add WatchlistPage import
-import 'home_page_content.dart'; // Import konten halaman home
-import 'anime_page_content.dart'; // Import konten halaman anime
+import 'home_page_content.dart';
+import 'pages/content_grid_page.dart'; // Import generic grid page
 import 'services/api_service.dart';
 import 'services/anime_service.dart';
-import 'movies_page_content.dart'; // Import konten halaman Movies
 import 'models/movie.dart';
 import 'models/anime.dart';
 import 'movie_detail_page.dart';
@@ -21,19 +20,18 @@ const List<String> categories = [
 
 
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<NavigationProvider>(
-      builder: (context, navigationProvider, child) {
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: _buildBody(navigationProvider.currentIndex),
-          bottomNavigationBar: _buildBottomNavigationBar(context, navigationProvider.currentIndex),
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the navigation provider to rebuild when index changes
+    final navigation = ref.watch(navigationProvider);
+    
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: _buildBody(navigation.currentIndex),
+      bottomNavigationBar: _buildBottomNavigationBar(context, ref, navigation.currentIndex),
     );
   }
 
@@ -49,7 +47,7 @@ class MainScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildBottomNavigationBar(BuildContext context, int currentIndex) {
+  Widget _buildBottomNavigationBar(BuildContext context, WidgetRef ref, int currentIndex) {
     return Container(
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: Colors.white12, width: 0.5)),
@@ -62,7 +60,8 @@ class MainScreen extends StatelessWidget {
         showUnselectedLabels: true,
         currentIndex: currentIndex,
         onTap: (index) {
-          Provider.of<NavigationProvider>(context, listen: false).setIndex(index);
+           // Use ref.read for actions/callbacks
+           ref.read(navigationProvider).setIndex(index);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Beranda'),
@@ -87,8 +86,8 @@ class HomeTabContainer extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           children: [
             const HomePageContent(),
-             const AnimePageContent(), // Use AnimePageContent for Series tab
-            const MoviesPageContent(),
+            ContentGridPage(fetchMethod: (page) => AnimeService().getTopAiring(page: page)), // Series Tab
+            ContentGridPage(fetchMethod: (page) => ApiService().getMoviesByCategory('popular', page: page)), // Movies Tab
           ],
         ),
       ),

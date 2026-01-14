@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import '../../models/movie.dart';
 import '../../models/review.dart'; // Added
 import '../../services/api_service.dart'; // Added for fetching reviews
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/watchlist_provider.dart';
 import 'widgets/comment_section.dart'; // Import CommentSection
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
-class MovieDetailPage extends StatefulWidget {
+class MovieDetailPage extends ConsumerStatefulWidget {
   final Movie movie;
 
   const MovieDetailPage({super.key, required this.movie});
 
   @override
-  State<MovieDetailPage> createState() => _MovieDetailPageState();
+  ConsumerState<MovieDetailPage> createState() => _MovieDetailPageState();
 }
 
-class _MovieDetailPageState extends State<MovieDetailPage> {
+class _MovieDetailPageState extends ConsumerState<MovieDetailPage> {
   late Future<List<Review>> _reviewsFuture;
 
   @override
@@ -38,8 +38,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             floating: false,
             pinned: true,
             actions: [
-               Consumer<WatchlistProvider>(
-                builder: (context, provider, child) {
+               Consumer(
+                builder: (context, ref, child) {
+                  final provider = ref.watch(watchlistProvider);
                   final isSaved = provider.isInWatchlist(widget.movie.id);
                   return IconButton(
                     icon: Icon(
@@ -195,7 +196,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       OutlinedButton(
                         onPressed: () {
                             // Add to Watchlist Logic (Duplicate of AppBar logic, but good for UX)
-                            final provider = Provider.of<WatchlistProvider>(context, listen: false);
+                            final provider = ref.read(watchlistProvider);
                             if (provider.isInWatchlist(widget.movie.id)) {
                                 provider.removeFromWatchlist(widget.movie.id);
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -216,8 +217,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           ),
                         ),
                         // Use Consumer to update icon state if needed, or just keep as generic Add/Check
-                        child: Consumer<WatchlistProvider>(
-                          builder: (context, provider, child) {
+                        child: Consumer(
+                          builder: (context, ref, child) {
+                             final provider = ref.watch(watchlistProvider);
                              return Icon(
                                provider.isInWatchlist(widget.movie.id) ? Icons.check : Icons.add,
                                color: Colors.white
