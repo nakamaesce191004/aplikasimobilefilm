@@ -5,8 +5,6 @@ import 'providers/watchlist_provider.dart';
 import 'models/anime.dart';
 import 'models/review.dart'; // Added
 import 'services/anime_service.dart';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'widgets/comment_section.dart'; // Import CommentSection
 

@@ -225,18 +225,38 @@ class _TrendingHeroSectionState extends State<TrendingHeroSection> {
                                       border: Border.all(color: Colors.white30, width: 2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: IconButton(
-                                      icon: const Icon(Icons.bookmark_outline, color: Colors.white),
-                                      onPressed: () {
-                                         final watchlistProvider = Provider.of<WatchlistProvider>(context, listen: false);
-                                         watchlistProvider.addToWatchlist(movie);
-                                         ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('${movie.title} added to Watchlist'),
-                                              behavior: SnackBarBehavior.floating,
-                                              backgroundColor: const Color(0xFF1F1F1F),
-                                            ),
-                                         );
+                                    child: Consumer<WatchlistProvider>(
+                                      builder: (context, watchlistProvider, child) {
+                                        final bool isInWatchlist = watchlistProvider.isInWatchlist(movie.id);
+                                        return IconButton(
+                                          icon: Icon(
+                                            isInWatchlist ? Icons.bookmark : Icons.bookmark_outline,
+                                            color: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            if (isInWatchlist) {
+                                              watchlistProvider.removeFromWatchlist(movie.id);
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                 SnackBar(
+                                                   content: Text('${movie.title} removed from Watchlist'),
+                                                   behavior: SnackBarBehavior.floating,
+                                                   backgroundColor: const Color(0xFF1F1F1F),
+                                                   duration: const Duration(seconds: 1),
+                                                 ),
+                                              );
+                                            } else {
+                                              watchlistProvider.addToWatchlist(movie);
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                 SnackBar(
+                                                   content: Text('${movie.title} added to Watchlist'),
+                                                   behavior: SnackBarBehavior.floating,
+                                                   backgroundColor: const Color(0xFF1F1F1F),
+                                                   duration: const Duration(seconds: 1),
+                                                 ),
+                                              );
+                                            }
+                                          },
+                                        );
                                       },
                                     ),
                                   ),
