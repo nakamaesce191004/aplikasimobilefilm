@@ -9,6 +9,7 @@ import 'services/anime_service.dart';
 import 'services/api_service.dart';
 import 'models/movie.dart';
 import 'models/anime.dart';
+import 'models/unified_content.dart';
 import 'pages/content_detail_page.dart';
 
 // Daftar kategori untuk TabBar horizontal
@@ -86,8 +87,14 @@ class HomeTabContainer extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           children: [
             const HomePageContent(),
-            ContentGridPage(fetchMethod: (page) => AnimeService().getTopAiring(page: page)), // Series Tab
-            ContentGridPage(fetchMethod: (page) => ApiService().getMoviesByCategory('popular', page: page)), // Movies Tab
+            ContentGridPage(fetchMethod: (page) async {
+              final items = await AnimeService().getTopAiring(page: page);
+              return items.map((e) => UnifiedContent.fromAnime(e)).toList();
+            }), // Series Tab
+            ContentGridPage(fetchMethod: (page) async {
+               final items = await ApiService().getMoviesByCategory('popular', page: page);
+               return items.map((e) => UnifiedContent.fromMovie(e)).toList();
+            }), // Movies Tab
           ],
         ),
       ),

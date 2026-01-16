@@ -5,6 +5,7 @@ import 'providers/watchlist_provider.dart'; // Added for Watchlist
 // Added for Navigation
 // Added for navigation
 import 'models/movie.dart';
+import 'models/unified_content.dart';
 import 'pages/content_detail_page.dart';
 
 import 'package:google_fonts/google_fonts.dart'; // Added
@@ -95,7 +96,7 @@ class _TrendingHeroSectionState extends State<TrendingHeroSection> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ContentDetailPage(content: movie),
+                        builder: (context) => ContentDetailPage(content: UnifiedContent.fromMovie(movie)),
                       ),
                     );
                   },

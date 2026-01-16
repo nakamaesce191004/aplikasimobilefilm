@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/anime_service.dart';
 import '../models/movie.dart';
 import '../models/anime.dart';
+import '../models/unified_content.dart';
 import '../pages/content_detail_page.dart';
 
 class UniversalSearchDelegate extends SearchDelegate {
@@ -91,7 +92,7 @@ class UniversalSearchDelegate extends SearchDelegate {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ContentDetailPage(content: item),
+                      builder: (context) => ContentDetailPage(content: UnifiedContent.fromMovie(item)),
                     ),
                   );
                 },
@@ -113,7 +114,7 @@ class UniversalSearchDelegate extends SearchDelegate {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ContentDetailPage(content: item),
+                      builder: (context) => ContentDetailPage(content: UnifiedContent.fromAnime(item)),
                     ),
                   );
                 },

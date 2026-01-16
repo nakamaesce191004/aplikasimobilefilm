@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/watchlist_provider.dart';
 import 'pages/content_detail_page.dart';
+import 'models/unified_content.dart';
 import 'models/movie.dart';
 import 'models/anime.dart'; // Import Anime model
 
@@ -112,7 +113,7 @@ class WatchlistPage extends ConsumerWidget {
              Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ContentDetailPage(content: movie),
+                builder: (context) => ContentDetailPage(content: UnifiedContent.fromMovie(movie)),
               ),
             );
           },
@@ -183,7 +184,7 @@ class WatchlistPage extends ConsumerWidget {
              Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ContentDetailPage(content: anime),
+                builder: (context) => ContentDetailPage(content: UnifiedContent.fromAnime(anime)),
               ),
             );
           },
