@@ -8,7 +8,7 @@ class AnimeService {
 
   Future<List<Anime>> searchAnime(String query) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/anime?q=$query'));
+      final response = await http.get(Uri.parse('$baseUrl/anime?q=$query&sfw'));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -25,7 +25,7 @@ class AnimeService {
 
   Future<List<Anime>> getTopAiring({int page = 1}) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/top/anime?filter=airing&page=$page'));
+      final response = await http.get(Uri.parse('$baseUrl/top/anime?filter=airing&page=$page&sfw'));
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
