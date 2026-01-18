@@ -121,7 +121,16 @@ class _ContentGridPageState extends State<ContentGridPage> {
     String title = '';
     VoidCallback onTap = () {};
 
-    if (item is Movie) {
+    if (item is UnifiedContent) {
+      imageUrl = item.posterUrl;
+      title = item.title;
+      onTap = () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ContentDetailPage(content: item)),
+        );
+      };
+    } else if (item is Movie) {
       imageUrl = item.fullPosterUrl;
       title = item.title;
       onTap = () {
