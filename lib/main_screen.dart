@@ -7,10 +7,7 @@ import 'pages/content_grid_page.dart'; // Import generic grid page
 import 'widgets/universal_search_delegate.dart';
 import 'services/anime_service.dart';
 import 'services/api_service.dart';
-import 'models/movie.dart';
-import 'models/anime.dart';
 import 'models/unified_content.dart';
-import 'pages/content_detail_page.dart';
 
 // Daftar kategori untuk TabBar horizontal
 const List<String> categories = [

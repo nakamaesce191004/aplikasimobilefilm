@@ -15,6 +15,7 @@ class CommentSection extends ConsumerStatefulWidget {
 
 class _CommentSectionState extends ConsumerState<CommentSection> {
   final TextEditingController _commentController = TextEditingController();
+  int _selectedRating = 0; // State for star rating
 
   @override
   void dispose() {
@@ -24,14 +25,24 @@ class _CommentSectionState extends ConsumerState<CommentSection> {
 
   void _submitComment() {
     if (_commentController.text.trim().isEmpty) return;
+    if (_selectedRating == 0) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         const SnackBar(content: Text('Please select a star rating')),
+       );
+       return;
+    }
 
     ref.read(commentProvider).addComment(
       widget.contentId,
       'You', 
       _commentController.text.trim(),
+      _selectedRating,
     );
 
     _commentController.clear();
+    setState(() {
+      _selectedRating = 0; // Reset rating
+    });
     FocusScope.of(context).unfocus(); // Close keyboard
   }
 
@@ -75,6 +86,24 @@ class _CommentSectionState extends ConsumerState<CommentSection> {
             ),
           ),
         ),
+        // Star Rating Input
+        Row(
+          children: List.generate(5, (index) {
+            return IconButton(
+              onPressed: () {
+                setState(() {
+                  _selectedRating = index + 1;
+                });
+              },
+              icon: Icon(
+                index < _selectedRating ? Icons.star : Icons.star_border,
+                color: Colors.amber,
+                size: 28,
+              ),
+            );
+          }),
+        ),
+        
         // Add Comment Input
         Row(
           children: [
@@ -172,6 +201,14 @@ class _CommentSectionState extends ConsumerState<CommentSection> {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: List.generate(5, (index) => Icon(
+              index < comment.rating ? Icons.star : Icons.star_border,
+              color: Colors.amber, 
+              size: 14
+            )),
+          ),
+          const SizedBox(height: 4),
           Text(
             comment.text,
             style: const TextStyle(color: Colors.white70),

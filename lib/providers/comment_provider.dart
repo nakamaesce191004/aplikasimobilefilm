@@ -9,11 +9,13 @@ class Comment {
   final String userName;
   final String text;
   final DateTime timestamp;
+  final int rating;    // Added rating
 
   Comment({
     required this.userName,
     required this.text,
     required this.timestamp,
+    this.rating = 0,   // Default 0
   });
 }
 
@@ -29,7 +31,7 @@ class CommentProvider extends ChangeNotifier {
     return List.from(_comments[contentId]!); 
   }
 
-  void addComment(String contentId, String userName, String text) {
+  void addComment(String contentId, String userName, String text, int rating) {
     if (!_comments.containsKey(contentId)) {
       _comments[contentId] = [];
     }
@@ -38,6 +40,7 @@ class CommentProvider extends ChangeNotifier {
       userName: userName,
       text: text,
       timestamp: DateTime.now(),
+      rating: rating,
     ));
 
     notifyListeners();

@@ -58,15 +58,21 @@ class _ContentDetailPageState extends ConsumerState<ContentDetailPage> {
         : provider.isAnimeInWatchlist(id);
 
     if (isSaved) {
-      if (isMovie) provider.removeFromWatchlist(id);
-      else provider.removeAnimeFromWatchlist(id);
+      if (isMovie) {
+        provider.removeFromWatchlist(id);
+      } else {
+        provider.removeAnimeFromWatchlist(id);
+      }
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${widget.content.title} removed from Watchlist')),
       );
     } else {
-      if (isMovie) provider.addToWatchlist(widget.content.originalData);
-      else provider.addAnimeToWatchlist(widget.content.originalData);
+      if (isMovie) {
+        provider.addToWatchlist(widget.content.originalData);
+      } else {
+        provider.addAnimeToWatchlist(widget.content.originalData);
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${widget.content.title} added to Watchlist')),
