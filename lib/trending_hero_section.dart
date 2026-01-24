@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:async'; // Added for Timer
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Added for Watchlist
-import 'providers/watchlist_provider.dart'; // Added for Watchlist
-// Added for Navigation
-// Added for navigation
+import 'dart:async'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'providers/watchlist_provider.dart'; 
 import 'models/movie.dart';
 import 'models/unified_content.dart';
 import 'pages/content_detail_page.dart';
-
-import 'package:google_fonts/google_fonts.dart'; // Added
-import 'package:url_launcher/url_launcher.dart'; // Added for trailer
+import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 
 class TrendingHeroSection extends StatefulWidget {
   final List<Movie> movies;

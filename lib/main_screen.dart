@@ -16,8 +16,6 @@ const List<String> categories = [
   'Movies',
 ];
 
-
-
 class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
 
